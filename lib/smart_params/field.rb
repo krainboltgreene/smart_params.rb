@@ -1,0 +1,61 @@
+module SmartParams
+  class Field
+    RECURSIVE_TREE = ->(accumulated, key) {accumulated[key] = Hash.new(&RECURSIVE_TREE)}
+
+    attr_reader :keychain
+    attr_reader :value
+    attr_reader :subfields
+    attr_reader :type
+
+    def initialize(keychain:, type:, &nesting)
+      @keychain = Array(keychain)
+      @subfields = Set.new
+      @type = type
+
+      if block_given?
+        instance_eval(&nesting)
+      end
+    end
+
+    def allow(key, type:, &subfield)
+      @subfields << self.class.new(keychain: [*keychain, key], type: type, &subfield)
+    end
+
+    def need(key, type:, &subfield)
+      @subfields << self.class.new(keychain: [*keychain, key], type: type, &subfield)
+    end
+
+    def deep?
+      subfields.present?
+    end
+
+    def claim(raw)
+      if keychain.empty?
+        @value = type[raw]
+      else
+        @value = type[raw.dig(*keychain)]
+      end
+    rescue Dry::Types::ConstraintError => bad_type_exception
+      raise SmartParams::Error::InvalidPropertyType, keychain: keychain, wanted: type, raw: raw.dig(*keychain)
+    end
+
+    def to_hash
+      *chain, key = keychain
+      Hash.new(&RECURSIVE_TREE).tap do |tree|
+        if chain.any?
+          tree.dig(*chain)[key] = value
+        else
+          tree[key] = value
+        end
+      end
+    end
+
+    def empty?
+      value.nil?
+    end
+
+    def weight
+      keychain.length
+    end
+  end
+end
