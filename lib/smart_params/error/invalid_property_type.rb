@@ -7,12 +7,12 @@ module SmartParams
 
       def initialize(keychain:, wanted:, raw:)
         @keychain = keychain
-        @wanted = type
+        @wanted = wanted
         @raw = raw
       end
 
       def message
-        "expected #{keychain.inspect} to be wanted of #{wanted.type.name}, but was #{raw.inspect}"
+        "expected #{keychain.inspect} to be #{wanted.type.name}, but was #{raw.inspect}"
       end
 
       def as_json

@@ -8,7 +8,7 @@ RSpec.describe SmartParams do
       let(:params) { {} }
 
       it "throws an error with a message detailing the invalid property type and given properties" do
-        expect {schema}.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be kind of Hash, but was nil")
+        expect {schema}.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but was nil")
       end
 
       it "throws an error with the missing property and given properties" do
@@ -22,7 +22,7 @@ RSpec.describe SmartParams do
       let(:params) { {data: ""} }
 
       it "throws an error with a message detailing the invalid property, expected type, given type, and given value" do
-        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be kind of Hash, but was \"\"")
+        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but was \"\"")
       end
 
       it "throws an error with the invalid property, expected type, given type, and given value" do

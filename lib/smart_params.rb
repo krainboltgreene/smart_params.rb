@@ -19,12 +19,12 @@ module SmartParams
   attr_reader :fields
 
   def initialize(raw, safe: true)
+    @safe = safe
     @raw = raw
     @schema = self.class.instance_variable_get(:@schema)
     @fields = [@schema, *unfold(@schema.subfields)]
       .sort_by(&:weight)
       .each { |field| field.claim(raw) }
-    @safe = safe
   rescue SmartParams::Error::InvalidPropertyType => invalid_property_type_exception
     if safe?
       raise invalid_property_type_exception
