@@ -17,11 +17,7 @@ module SmartParams
       end
     end
 
-    def allow(key, type:, &subfield)
-      @subfields << self.class.new(keychain: [*keychain, key], type: type, &subfield)
-    end
-
-    def need(key, type:, &subfield)
+    def field(key, type:, &subfield)
       @subfields << self.class.new(keychain: [*keychain, key], type: type, &subfield)
     end
 

@@ -7,18 +7,18 @@ class CreateAccountSchema
   include SmartParams
 
   schema type: Strict::Hash do
-    need :data, type: Strict::Hash do
-      allow :id, type: Coercible::String.optional
-      need :type, type: Strict::String
-      allow :attributes, type: Strict::Hash.optional do
-        allow :email, type: Strict::String.optional
-        allow :username, type: Strict::String.optional
-        allow :name, type: Strict::String.optional
-        allow :password, type: Strict::String.optional.default { SecureRandom.hex(32) }
+    field :data, type: Strict::Hash do
+      field :id, type: Coercible::String.optional
+      field :type, type: Strict::String
+      field :attributes, type: Strict::Hash.optional do
+        field :email, type: Strict::String.optional
+        field :username, type: Strict::String.optional
+        field :name, type: Strict::String.optional
+        field :password, type: Strict::String.optional.default { SecureRandom.hex(32) }
       end
     end
-    allow :meta, type: Strict::Hash.optional
-    allow :included, type: Strict::Array.optional
+    field :meta, type: Strict::Hash.optional
+    field :included, type: Strict::Array.optional
   end
 end
 
