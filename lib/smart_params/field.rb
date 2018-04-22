@@ -32,7 +32,7 @@ module SmartParams
         @value = type[raw.dig(*keychain)]
       end
     rescue Dry::Types::ConstraintError => bad_type_exception
-      raise SmartParams::Error::InvalidPropertyType, keychain: keychain, wanted: type, raw: raw.dig(*keychain)
+      raise SmartParams::Error::InvalidPropertyType, keychain: keychain, wanted: type, raw: if keychain.empty? then raw else raw.dig(*keychain) end
     end
 
     def to_hash
