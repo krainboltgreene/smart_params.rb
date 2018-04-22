@@ -86,7 +86,7 @@ module SmartParams
 
   class_methods do
     def schema(type:, &subfield)
-      @schema = Field.new(keychain: [], type: type, &subfield)
+      @schema = Field.new(keychain: [], type: type, root: true, &subfield)
     end
   end
 end

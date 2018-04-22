@@ -7,7 +7,8 @@ module SmartParams
     attr_reader :subfields
     attr_reader :type
 
-    def initialize(keychain:, type:, &nesting)
+    def initialize(keychain:, type:, root: false, &nesting)
+      @root = root
       @keychain = Array(keychain)
       @subfields = Set.new
       @type = type
@@ -26,10 +27,8 @@ module SmartParams
     end
 
     def claim(raw)
-      if keychain.empty?
-        @value = type[raw]
-      else
-        @value = type[raw.dig(*keychain)]
+      unless root?
+        @value = type[if keychain.empty? then raw else raw.dig(*keychain) end]
       end
     rescue Dry::Types::ConstraintError => bad_type_exception
       raise SmartParams::Error::InvalidPropertyType, keychain: keychain, wanted: type, raw: if keychain.empty? then raw else raw.dig(*keychain) end
@@ -48,6 +47,10 @@ module SmartParams
 
     def empty?
       value.nil?
+    end
+
+    def root?
+      @root
     end
 
     def weight

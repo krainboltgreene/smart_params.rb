@@ -81,6 +81,39 @@ RSpec.describe SmartParams do
   describe "#as_json" do
     subject {schema.as_json}
 
+    context "with extra params" do
+      let(:params) do
+        {
+          data: {
+            type: "accounts",
+            attributes: {
+              email: "kurtis@example.com"
+            }
+          },
+          x: "y"
+        }
+      end
+
+      it "returns as json" do
+        expect(
+          subject
+        ).to eq(
+          {
+            "data" => hash_including(
+              {
+                "type" => "accounts",
+                "attributes" => hash_including(
+                  {
+                    "email" => "kurtis@example.com",
+                  }
+                )
+              }
+            ),
+          }
+        )
+      end
+    end
+
     context "with a reasonably good params" do
       let(:params) do
         {
