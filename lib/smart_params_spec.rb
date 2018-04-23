@@ -87,10 +87,11 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              y: "y"
             }
           },
-          x: "y"
+          x: "x"
         }
       end
 
