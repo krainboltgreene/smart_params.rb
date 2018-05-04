@@ -8,8 +8,6 @@ module SmartParams
   extend ActiveSupport::Concern
   include Dry::Types.module
 
-  RECURSIVE_TREE = ->(accumulated, key) {accumulated[key] = Hash.new(&RECURSIVE_TREE)}
-
   require_relative "smart_params/field"
   require_relative "smart_params/error"
   require_relative "smart_params/version"
