@@ -1,7 +1,5 @@
 module SmartParams
   class Field
-    RECURSIVE_TREE = ->(accumulated, key) {accumulated[key] = Hash.new(&RECURSIVE_TREE)}
-
     attr_reader :keychain
     attr_reader :value
     attr_reader :subfields
