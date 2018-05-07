@@ -98,7 +98,7 @@ RSpec.describe SmartParams do
       it "returns as json" do
         expect(
           subject
-        ).to eq(
+        ).to match(
           {
             "data" => hash_including(
               {
@@ -144,7 +144,7 @@ RSpec.describe SmartParams do
       it "returns as json" do
         expect(
           subject
-        ).to eq(
+        ).to match(
           hash_including(
             {
               "data" => hash_including(

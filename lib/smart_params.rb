@@ -39,11 +39,11 @@ module SmartParams
     end
   end
 
-  def as_json
+  def as_json(options = nil)
     if @exception.present?
-      @exception.as_json
+      @exception.as_json(options)
     else
-      structure.deep_stringify_keys
+      structure.as_json(options)
     end
   end
 
