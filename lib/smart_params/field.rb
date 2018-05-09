@@ -28,13 +28,8 @@ module SmartParams
     end
 
     def to_hash
-      *chain, key = keychain
-      Hash.new(&RECURSIVE_TREE).tap do |tree|
-        if chain.any?
-          tree.dig(*chain)[key] = value
-        else
-          tree[key] = value
-        end
+      keychain.reverse.reduce(value) do |accumulation, key|
+        { key => accumulation }
       end
     end
 

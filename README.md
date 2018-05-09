@@ -132,7 +132,7 @@ Your model is already complex enough and it doesn't need the added baggage of fi
 
 Add this line to your application's Gemfile:
 
-    gem "smart_params", "2.0.5"
+    gem "smart_params", "2.0.6"
 
 And then execute:
 
