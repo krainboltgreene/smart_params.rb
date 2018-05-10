@@ -12,13 +12,13 @@ module SmartParams
       end
 
       def message
-        "expected #{keychain.inspect} to be #{wanted.type.name}, but was #{raw.inspect}"
+        "expected #{keychain.inspect} to be #{wanted.name}, but was #{raw.inspect}"
       end
 
       def as_json
         {
           "keychain" => keychain,
-          "wanted" => wanted.type.name,
+          "wanted" => wanted.name,
           "raw" => raw
         }
       end
