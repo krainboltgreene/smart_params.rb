@@ -13,7 +13,7 @@ class CreateAccountSchema
       field :attributes, type: Strict::Hash.optional do
         field :email, type: Strict::String.optional
         field :username, type: Strict::String.optional
-        field :name, type: Strict::String.optional
+        field "full-name", type: Strict::String.optional
         field :password, type: Strict::String.optional.default { SecureRandom.hex(32) }
       end
     end

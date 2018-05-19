@@ -38,7 +38,7 @@ module SmartParams
     end
 
     def weight
-      keychain
+      keychain.map(&:to_s)
     end
 
     private def field(key, type:, &subfield)

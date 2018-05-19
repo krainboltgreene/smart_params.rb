@@ -115,6 +115,40 @@ RSpec.describe SmartParams do
       end
     end
 
+    context "with string key params" do
+      let(:params) do
+        {
+          data: {
+            type: "accounts",
+            attributes: {
+              email: "kurtis@example.com",
+              "full-name" => "Kurtis Rainbolt-Greene"
+            }
+          }
+        }
+      end
+
+      it "returns as json" do
+        expect(
+          subject
+        ).to match(
+          {
+            "data" => hash_including(
+              {
+                "type" => "accounts",
+                "attributes" => hash_including(
+                  {
+                    "email" => "kurtis@example.com",
+                    "full-name" => "Kurtis Rainbolt-Greene"
+                  }
+                )
+              }
+            ),
+          }
+        )
+      end
+    end
+
     context "with a reasonably good params" do
       let(:params) do
         {
