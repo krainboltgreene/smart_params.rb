@@ -47,6 +47,18 @@ module SmartParams
     end
   end
 
+  def fetch(key, default = KeyError)
+    if default == KeyError
+      as_json.fetch(key, default)
+    else
+      as_json.fetch(key)
+    end
+  end
+
+  def dig(*keys)
+    as_json.dig(*keys)
+  end
+
   def method_missing(name, *arguments, &block)
     if payload.respond_to?(name)
       payload.public_send(name)
