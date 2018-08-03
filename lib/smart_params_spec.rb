@@ -34,6 +34,8 @@ RSpec.describe SmartParams do
   end
 
   describe "#payload" do
+    subject {schema.payload}
+
     context "with a reasonably good params" do
       let(:params) do
         {
@@ -60,27 +62,25 @@ RSpec.describe SmartParams do
         }
       end
 
-      it "returns the type" do
-        expect(schema.payload.data.type).to eq("accounts")
+      it "has a chain path data.type" do
+        expect(subject.data.type).to eq("accounts")
       end
 
-      it "returns the email" do
-        expect(schema.data.attributes.email).to eq("kurtis@example.com")
+      it "has a chain path data.attributes.email" do
+        expect(subject.data.attributes.email).to eq("kurtis@example.com")
       end
 
-      it "returns the password" do
-        expect(schema.data.attributes.password).to be_kind_of(String)
+      it "has a chain path data.attributes.password" do
+        expect(subject.data.attributes.password).to be_kind_of(String)
       end
 
-      it "returns the jsonapi version" do
-        expect(schema.meta.jsonapi_version).to eq("1.0")
+      it "has a chain path meta.jsonapi_version" do
+        expect(subject.meta.jsonapi_version).to eq("1.0")
       end
     end
   end
 
-  describe "#as_json" do
-    subject {schema.as_json}
-
+  shared_examples "native types" do
     context "with extra params" do
       let(:params) do
         {
@@ -95,7 +95,7 @@ RSpec.describe SmartParams do
         }
       end
 
-      it "returns as json" do
+      it "returns as native data types" do
         expect(
           subject
         ).to match(
@@ -128,7 +128,7 @@ RSpec.describe SmartParams do
         }
       end
 
-      it "returns as json" do
+      it "returns as native data types" do
         expect(
           subject
         ).to match(
@@ -175,7 +175,7 @@ RSpec.describe SmartParams do
         }
       end
 
-      it "returns as json" do
+      it "returns as native data types" do
         expect(
           subject
         ).to match(
@@ -208,6 +208,162 @@ RSpec.describe SmartParams do
               ]
             }
           )
+        )
+      end
+    end
+  end
+
+  describe "#to_hash" do
+    subject {schema.to_hash}
+
+    include_examples "native types"
+  end
+
+  describe "#as_json" do
+    subject {schema.as_json}
+
+    include_examples "native types"
+  end
+
+  describe "#fetch" do
+    subject {schema.fetch("data")}
+
+    context "with a reasonably good params" do
+      let(:params) do
+        {
+          data: {
+            type: "accounts",
+            attributes: {
+              email: "kurtis@example.com"
+            }
+          },
+          meta: {
+            jsonapi_version: "1.0"
+          },
+          included: [
+            {
+              data: {
+                id: "a",
+                type: "widget",
+                attributes: {
+                  title: "Widget A",
+                }
+              }
+            }
+          ]
+        }
+      end
+
+      it "returns the native type" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "type" => "accounts",
+              "attributes" => hash_including(
+                {
+                  "email" => "kurtis@example.com",
+                  "password" => an_instance_of(String)
+                }
+              )
+            }
+          )
+        )
+      end
+    end
+  end
+
+  describe "#dig" do
+    subject {schema.dig("data", "attributes", "email")}
+
+    context "with a reasonably good params" do
+      let(:params) do
+        {
+          data: {
+            type: "accounts",
+            attributes: {
+              email: "kurtis@example.com"
+            }
+          },
+          meta: {
+            jsonapi_version: "1.0"
+          },
+          included: [
+            {
+              data: {
+                id: "a",
+                type: "widget",
+                attributes: {
+                  title: "Widget A",
+                }
+              }
+            }
+          ]
+        }
+      end
+
+      it "returns the native type" do
+        expect(
+          subject
+        ).to eq(
+          "kurtis@example.com"
+        )
+      end
+    end
+  end
+
+  describe "#fetch_values" do
+    subject {schema.fetch_values("data", "meta")}
+
+    context "with a reasonably good params" do
+      let(:params) do
+        {
+          data: {
+            type: "accounts",
+            attributes: {
+              email: "kurtis@example.com"
+            }
+          },
+          meta: {
+            jsonapi_version: "1.0"
+          },
+          included: [
+            {
+              data: {
+                id: "a",
+                type: "widget",
+                attributes: {
+                  title: "Widget A",
+                }
+              }
+            }
+          ]
+        }
+      end
+
+      it "returns the native type" do
+        expect(
+          subject
+        ).to match(
+          [
+            hash_including(
+              {
+                "type" => "accounts",
+                "attributes" => hash_including(
+                  {
+                    "email" => "kurtis@example.com",
+                    "password" => an_instance_of(String)
+                  }
+                )
+              }
+            ),
+            hash_including(
+              {
+                "jsonapi_version" => "1.0"
+              }
+            )
+          ]
         )
       end
     end
