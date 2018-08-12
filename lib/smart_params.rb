@@ -39,7 +39,7 @@ module SmartParams
     if @exception.present?
       @exception.as_json(options)
     else
-      structure.as_json(options)
+      structure.as_json(options) || {}
     end
   end
   alias_method :as_json, :to_hash
