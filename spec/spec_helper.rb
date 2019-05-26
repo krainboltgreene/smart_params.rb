@@ -21,6 +21,33 @@ class CreateAccountSchema
   end
 end
 
+class UpdateAccountSchema
+  include SmartParams
+
+  schema type: Strict::Hash do
+    field :data, type: Strict::Hash do
+      field :id, type: Coercible::String.optional
+      field :type, type: Strict::String
+      field :attributes, type: Strict::Hash.optional do
+        field :email, type: Strict::String.optional
+        field :username, type: Strict::String.optional
+        field "full-name", type: Strict::String.optional
+        field :password, type: Strict::String.optional
+      end
+      field :relationships, type: Strict::Hash.optional do
+        field :owner, type: Strict::Hash.optional do
+          field :data, type: Strict::Hash.optional.maybe, nullable: true do
+            field :id, type: Coercible::String.optional
+            field :type, type: Strict::String.optional
+          end
+        end
+      end
+    end
+    field :meta, type: Strict::Hash.optional
+    field :included, type: Strict::Array.optional
+  end
+end
+
 RSpec.configure do |let|
   # Enable flags like --only-failures and --next-failure
   let.example_status_persistence_file_path = ".rspec_status"

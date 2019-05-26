@@ -1,8 +1,11 @@
 require "dry-types"
+require "dry/monads/maybe"
 require "recursive-open-struct"
 require "active_support/concern"
 require "active_support/core_ext/object"
 require "active_support/core_ext/module/delegation"
+
+Dry::Types.load_extensions(:maybe)
 
 module SmartParams
   extend ActiveSupport::Concern
@@ -68,12 +71,8 @@ module SmartParams
   # This function basically takes a list of fields and reduces them into a tree of values
   private def structure
     fields
-      .reject(&:empty?)
+      .reject(&:remove?)
       .map(&:to_hash)
-      .map do |hash|
-        # NOTE: okay, so this looks weird, but it's because the root type has no key
-        if hash.key?(nil) then hash.fetch(nil) else hash end
-      end
       .reduce(&:deep_merge)
   end
 
