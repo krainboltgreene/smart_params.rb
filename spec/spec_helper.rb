@@ -1,5 +1,4 @@
 require "pry"
-require "rspec"
 require "smart_params"
 require "securerandom"
 

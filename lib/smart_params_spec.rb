@@ -42,7 +42,8 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              password: "secret"
             }
           },
           meta: {
@@ -155,7 +156,8 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              password: "secret"
             }
           },
           meta: {
@@ -234,7 +236,8 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              password: "secret"
             }
           },
           meta: {
@@ -322,7 +325,8 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              password: "secret"
             }
           },
           meta: {
