@@ -2,7 +2,7 @@ require "spec_helper"
 
 RSpec.describe SmartParams do
   let(:schema) { CreateAccountSchema.new(params) }
-  let(:update_schema) { UpdateAccountSchema.new(params) }
+  let(:nullable_schema) { NullableSchema.new(params) }
 
   describe ".new" do
     context "with an empty params" do
@@ -374,226 +374,102 @@ RSpec.describe SmartParams do
     end
   end
 
-  context "with nil relationship" do
-    subject {update_schema.to_hash}
+  describe "nullable values" do
+    context "set to nil" do
+      subject {nullable_schema.to_hash}
 
-    let(:params) do
-      {
-        data: {
-          id: "1",
-          type: "accounts",
-          attributes: {
-            email: "kurtis@example.com",
-            password: "new_secret"
-          },
-          relationships: {
-            owner: {
-              data: nil
-            }
-          }
-        },
-        meta: {
-          jsonapi_version: "1.0"
+      let(:params) do
+        {
+          data: nil
         }
-      }
-    end
+      end
 
-    it "returns nil data" do
-      expect(
-        subject
-      ).to match(
-        hash_including(
-          {
-            "data" => hash_including(
-              {
-                "id" => "1",
-                "type" => "accounts",
-                "attributes" => hash_including(
-                  {
-                    "email" => "kurtis@example.com",
-                    "password" => an_instance_of(String)
-                  }
-                ),
-                "relationships" => hash_including(
-                  {
-                    "owner" => hash_including(
-                      {
-                        "data" => nil
-                      }
-                    )
-                  }
-                )
-              }
-            ),
-            "meta" => {
-              "jsonapi_version" => "1.0"
+      it "returns explicit nil" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => nil
             }
-          }
+          )
         )
-      )
+      end
     end
-  end
 
-  context "with updated relationship" do
-    subject {update_schema.to_hash}
+    context "provided matching data" do
+      subject {nullable_schema.to_hash}
 
-    let(:params) do
-      {
-        data: {
-          id: "1",
-          type: "accounts",
-          attributes: {
-            email: "kurtis@example.com",
-            password: "new_secret"
-          },
-          relationships: {
-            owner: {
-              data: {
-                id: 1,
-                type: "people"
-              }
-            }
+      let(:params) do
+        {
+          data: {
+            id: "1",
+            type: "people"
           }
-        },
-        meta: {
-          jsonapi_version: "1.0"
         }
-      }
-    end
+      end
 
-    it "returns nil data" do
-      expect(
-        subject
-      ).to match(
-        hash_including(
-          {
-            "data" => hash_including(
-              {
-                "id" => "1",
-                "type" => "accounts",
-                "attributes" => hash_including(
-                  {
-                    "email" => "kurtis@example.com",
-                    "password" => an_instance_of(String)
-                  }
-                ),
-                "relationships" => hash_including(
-                  {
-                    "owner" => hash_including(
-                      {
-                        "data" => hash_including(
-                          {
-                            "id" => "1",
-                            "type" => "people"
-                          }
-                        )
-                      }
-                    )
-                  }
-                )
-              }
-            ),
-            "meta" => {
-              "jsonapi_version" => "1.0"
+      it "returns matching data" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => hash_including(
+                {
+                  "id" => "1",
+                  "type" => "people"
+                }
+              )
             }
-          }
+          )
         )
-      )
+      end
     end
-  end
 
-  context "with nullable field not set" do
-    subject {update_schema.to_hash}
+    context "not provided" do
+      subject {nullable_schema.to_hash}
 
-    let(:params) do
-      {
-        data: {
-          id: "1",
-          type: "accounts",
-          attributes: {
-            email: "kurtis@example.com",
-            password: "new_secret"
-          }
-        },
-        meta: {
-          jsonapi_version: "1.0"
+      let(:params) do
+        {
         }
-      }
-    end
+      end
 
-    it "does not set nil relationship" do
-      expect(
-        subject
-      ).to match(
-        hash_including(
-          {
-            "data" => hash_excluding(
-              {
-                "relationships" => hash_including(
-                  {
-                    "owner" => hash_including(
-                      {
-                        "data" => nil
-                      }
-                    )
-                  }
-                )
-              }
-            )
-          }
-        )
-      )
-    end
-  end
-
-  context "with spoofed nil relationship" do
-    subject {update_schema.to_hash}
-
-    let(:params) do
-      {
-        data: {
-          id: "1",
-          type: "accounts",
-          attributes: {
-            email: "kurtis@example.com",
-            password: "new_secret"
-          },
-          relationships: {
-            owner: {
-              data: {
-                is: "garbage"
-              }
+      it "does not set nil relationship" do
+        expect(
+          subject
+        ).to match(
+          hash_excluding(
+            {
+              "data" => nil
             }
-          }
-        },
-        meta: {
-          jsonapi_version: "1.0"
-        }
-      }
+          )
+        )
+      end
     end
 
-    it "does not set nil relationship" do
-      expect(
-        subject
-      ).to match(
-        hash_including(
-          {
-            "data" => hash_excluding(
-              {
-                "relationships" => hash_including(
-                  {
-                    "owner" => hash_including(
-                      {
-                        "data" => nil
-                      }
-                    )
-                  }
-                )
-              }
-            )
+    context "with non matching subfield data" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+          data: {
+            is: "garbage"
           }
+        }
+      end
+
+      it "does not provide data" do
+        expect(
+          subject
+        ).to match(
+          hash_excluding(
+            {
+              "data" => nil
+            }
+          )
         )
-      )
+      end
     end
   end
 end
