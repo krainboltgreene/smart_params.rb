@@ -6,7 +6,7 @@ require "active_support/core_ext/module/delegation"
 
 module SmartParams
   extend ActiveSupport::Concern
-  include Dry::Types.module
+  include Dry.Types()
 
   require_relative "smart_params/field"
   require_relative "smart_params/error"
