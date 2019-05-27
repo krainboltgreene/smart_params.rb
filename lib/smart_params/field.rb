@@ -70,7 +70,7 @@ module SmartParams
     end
 
     def to_hash
-      v = keychain.reverse.reduce(value) do |accumulation, key|
+      keychain.reverse.reduce(value) do |accumulation, key|
         { key => accumulation }
       end
     end
