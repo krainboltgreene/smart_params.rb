@@ -43,7 +43,7 @@ RSpec.describe SmartParams do
             type: "accounts",
             attributes: {
               email: "kurtis@example.com",
-              password: "secret"
+              password: "supersecret"
             }
           },
           meta: {
