@@ -1,11 +1,8 @@
 require "dry-types"
-require "dry/monads/maybe"
 require "recursive-open-struct"
 require "active_support/concern"
 require "active_support/core_ext/object"
 require "active_support/core_ext/module/delegation"
-
-Dry::Types.load_extensions(:maybe)
 
 module SmartParams
   extend ActiveSupport::Concern
