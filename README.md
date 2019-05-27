@@ -148,6 +148,7 @@ Or install it yourself with:
   1. Read the [Code of Conduct](/CONDUCT.md)
   2. Fork it
   3. Create your feature branch (`git checkout -b my-new-feature`)
-  4. Commit your changes (`git commit -am 'Add some feature'`)
-  5. Push to the branch (`git push origin my-new-feature`)
-  6. Create new Pull Request
+  4. Test your code: `rake spec`
+  5. Commit your changes (`git commit -am 'Add some feature'`)
+  6. Push to the branch (`git push origin my-new-feature`)
+  7. Create new Pull Request
