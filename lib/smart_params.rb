@@ -68,7 +68,7 @@ module SmartParams
   # This function basically takes a list of fields and reduces them into a tree of values
   private def structure
     fields
-      .reject(&:remove?)
+      .reject(&:removable?)
       .map(&:to_hash)
       .reduce(&:deep_merge)
   end

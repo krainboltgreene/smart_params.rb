@@ -79,8 +79,8 @@ module SmartParams
       value.nil?
     end
 
-    # Remove from resulting hash?
-    def remove?
+    # Should this field be removed from resulting hash?
+    def removable?
       empty? && !allow_empty?
     end
 
