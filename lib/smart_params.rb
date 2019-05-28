@@ -6,7 +6,7 @@ require "active_support/core_ext/module/delegation"
 
 module SmartParams
   extend ActiveSupport::Concern
-  include Dry::Types.module
+  include Dry.Types()
 
   require_relative "smart_params/field"
   require_relative "smart_params/error"
@@ -68,12 +68,8 @@ module SmartParams
   # This function basically takes a list of fields and reduces them into a tree of values
   private def structure
     fields
-      .reject(&:empty?)
+      .reject(&:removable?)
       .map(&:to_hash)
-      .map do |hash|
-        # NOTE: okay, so this looks weird, but it's because the root type has no key
-        if hash.key?(nil) then hash.fetch(nil) else hash end
-      end
       .reduce(&:deep_merge)
   end
 

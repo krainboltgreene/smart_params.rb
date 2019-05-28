@@ -1,5 +1,4 @@
 require "pry"
-require "rspec"
 require "smart_params"
 require "securerandom"
 
@@ -19,6 +18,17 @@ class CreateAccountSchema
     end
     field :meta, type: Strict::Hash.optional
     field :included, type: Strict::Array.optional
+  end
+end
+
+class NullableSchema
+  include SmartParams
+
+  schema type: Strict::Hash do
+    field :data, type: Strict::Hash | Strict::Nil, nullable: true do
+      field :id, type: Coercible::String.optional
+      field :type, type: Strict::String.optional
+    end
   end
 end
 

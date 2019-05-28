@@ -2,6 +2,7 @@ require "spec_helper"
 
 RSpec.describe SmartParams do
   let(:schema) { CreateAccountSchema.new(params) }
+  let(:nullable_schema) { NullableSchema.new(params) }
 
   describe ".new" do
     context "with an empty params" do
@@ -42,7 +43,8 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              password: "secret"
             }
           },
           meta: {
@@ -155,7 +157,8 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              password: "secret"
             }
           },
           meta: {
@@ -234,7 +237,8 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              password: "secret"
             }
           },
           meta: {
@@ -322,7 +326,8 @@ RSpec.describe SmartParams do
           data: {
             type: "accounts",
             attributes: {
-              email: "kurtis@example.com"
+              email: "kurtis@example.com",
+              password: "secret"
             }
           },
           meta: {
@@ -364,6 +369,105 @@ RSpec.describe SmartParams do
               }
             )
           ]
+        )
+      end
+    end
+  end
+
+  describe "nullable values" do
+    context "set to nil" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+          data: nil
+        }
+      end
+
+      it "returns explicit nil" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => nil
+            }
+          )
+        )
+      end
+    end
+
+    context "provided matching data" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+          data: {
+            id: "1",
+            type: "people"
+          }
+        }
+      end
+
+      it "returns matching data" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => hash_including(
+                {
+                  "id" => "1",
+                  "type" => "people"
+                }
+              )
+            }
+          )
+        )
+      end
+    end
+
+    context "not provided" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+        }
+      end
+
+      it "does not set nil relationship" do
+        expect(
+          subject
+        ).to match(
+          hash_excluding(
+            {
+              "data" => nil
+            }
+          )
+        )
+      end
+    end
+
+    context "with non matching subfield data" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+          data: {
+            is: "garbage"
+          }
+        }
+      end
+
+      it "does not provide data" do
+        expect(
+          subject
+        ).to match(
+          hash_excluding(
+            {
+              "data" => nil
+            }
+          )
         )
       end
     end
