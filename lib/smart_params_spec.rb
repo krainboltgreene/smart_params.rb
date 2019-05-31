@@ -473,7 +473,7 @@ RSpec.describe SmartParams do
       end
     end
 
-    context "specified with required subfield" do
+    context "specified with unclean data" do
       subject {nullable_required_subfield_schema.to_hash}
 
       let(:params) do
@@ -490,6 +490,24 @@ RSpec.describe SmartParams do
         expect {
           subject
         }.to raise_exception(SmartParams::Error::InvalidPropertyType)
+      end
+    end
+
+    context "specified as null" do
+      subject {nullable_required_subfield_schema.to_hash}
+
+      let(:params) do
+        {
+          # This will not raise an error, since data is allowed to be null.
+          # Subfields will not be checked.
+          data: nil
+        }
+      end
+
+      it "checks subfields" do
+        expect {
+          subject
+        }.not_to raise_exception(SmartParams::Error::InvalidPropertyType)
       end
     end
 
