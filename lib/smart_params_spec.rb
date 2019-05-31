@@ -507,7 +507,7 @@ RSpec.describe SmartParams do
       it "checks subfields" do
         expect {
           subject
-        }.not_to raise_exception(SmartParams::Error::InvalidPropertyType)
+        }.not_to raise_exception
       end
     end
 
@@ -524,7 +524,7 @@ RSpec.describe SmartParams do
       it "allows null value" do
         expect {
           subject
-        }.not_to raise_error
+        }.not_to raise_exception
       end
     end
   end
