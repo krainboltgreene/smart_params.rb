@@ -3,6 +3,7 @@ require "spec_helper"
 RSpec.describe SmartParams do
   let(:schema) { CreateAccountSchema.new(params) }
   let(:nullable_schema) { NullableSchema.new(params) }
+  let(:nullable_required_subfield_schema) { NullableRequiredSubfieldSchema.new(params) }
 
   describe ".new" do
     context "with an empty params" do
@@ -469,6 +470,43 @@ RSpec.describe SmartParams do
             }
           )
         )
+      end
+    end
+
+    context "specified with required subfield" do
+      subject {nullable_required_subfield_schema.to_hash}
+
+      let(:params) do
+        {
+          # This will raise an exception becase the data hash is specified
+          # but its required subfields are not.
+          data: {
+            is: 'garbage'
+          }
+        }
+      end
+
+      it "checks subfields" do
+        expect {
+          subject
+        }.to raise_exception(SmartParams::Error::InvalidPropertyType)
+      end
+    end
+
+    context "unspecified with required subfield" do
+      subject {nullable_required_subfield_schema.to_hash}
+
+      let(:params) do
+        {
+          # In this case, the nullable data hash is not specified so we
+          # don't need to enforce constraints on subfields.
+        }
+      end
+
+      it "allows null value" do
+        expect {
+          subject
+        }.not_to raise_error
       end
     end
   end
