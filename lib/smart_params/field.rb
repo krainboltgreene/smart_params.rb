@@ -18,6 +18,9 @@ module SmartParams
     end
 
     def deep?
+      # We check @specified directly because we want to know if ANY
+      # subfields have been passed, not just ones that match the schema.
+      return false if nullable? && !!@specified
       subfields.present?
     end
 
