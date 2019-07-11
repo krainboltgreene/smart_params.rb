@@ -9,6 +9,10 @@ module SmartParams
       @subfields = Set.new
       @type = type
       @nullable = nullable
+      # Is the value exactly null?
+      @null = false
+      # Value of the field. Not set unless field is a leaf (no children)
+      @value = nil
       @specified = false
       @dirty = false
 
@@ -18,9 +22,7 @@ module SmartParams
     end
 
     def deep?
-      # We check @specified directly because we want to know if ANY
-      # subfields have been passed, not just ones that match the schema.
-      return false if nullable? && !!@specified
+      return false if nullable? && !!@null
       subfields.present?
     end
 
@@ -65,9 +67,15 @@ module SmartParams
     end
 
     def claim(raw)
-      return type[dug(raw)] if deep?
+      v = dug(raw)
 
-      @value = type[dug(raw)]
+      if v.nil?
+        @null = true
+      end
+
+      return type[v] if deep?
+
+      @value = type[v]
     rescue Dry::Types::ConstraintError => bad_type_exception
       raise SmartParams::Error::InvalidPropertyType, keychain: keychain, wanted: type, raw: if keychain.empty? then raw else raw.dig(*keychain) end
     end

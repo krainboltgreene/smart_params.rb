@@ -20,7 +20,7 @@ module SmartParams
     @safe = safe
     @raw = raw
     @schema = self.class.instance_variable_get(:@schema)
-    @fields = [@schema, *unfold(@schema.subfields)].sort_by(&:weight).each { |field| field.claim(raw) }
+    @fields = [@schema, *unfold(raw, @schema.subfields)].sort_by(&:weight)
   rescue SmartParams::Error::InvalidPropertyType => invalid_property_type_exception
     raise invalid_property_type_exception if safe?
 
@@ -74,10 +74,12 @@ module SmartParams
   end
 
   # This funcion takes a nested field tree and turns it into a list of fields
-  private def unfold(subfields)
+  private def unfold(raw, subfields)
     subfields.to_a.reduce([]) do |list, field|
+      field.claim(raw)
+
       if field.deep?
-        [*list, field, *unfold(field.subfields)]
+        [*list, field, *unfold(raw, field.subfields)]
       else
         [*list, field]
       end
