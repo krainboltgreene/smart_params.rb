@@ -36,7 +36,7 @@ class NullableRequiredSubfieldSchema
   include SmartParams
 
   schema type: Strict::Hash do
-    field :data, type: Strict::Hash | Strict::Nil, nullable: true do
+    field :data, type: Strict::Hash, nullable: true do
       field :id, type: Coercible::String
       field :type, type: Strict::String
     end

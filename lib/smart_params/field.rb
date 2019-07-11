@@ -92,6 +92,9 @@ module SmartParams
     end
 
     private def field(key, type:, nullable: false, &subfield)
+      if nullable
+        type |= SmartParams::Strict::Nil
+      end
       @subfields << self.class.new(keychain: [*keychain, key], type: type, nullable: nullable, &subfield)
     end
 
