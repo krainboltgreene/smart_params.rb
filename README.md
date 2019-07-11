@@ -1,6 +1,6 @@
 # smart_params
 
-  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/smart_params.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/smart_params)
+  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/smart_params.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/smart_params.rb)
   - [![Downloads](http://img.shields.io/gem/dtv/smart_params.svg?style=flat-square)](https://rubygems.org/gems/smart_params)
   - [![Version](http://img.shields.io/gem/v/smart_params.svg?style=flat-square)](https://rubygems.org/gems/smart_params)
 
