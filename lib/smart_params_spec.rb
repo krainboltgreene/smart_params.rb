@@ -2,6 +2,8 @@ require "spec_helper"
 
 RSpec.describe SmartParams do
   let(:schema) { CreateAccountSchema.new(params) }
+  let(:nullable_schema) { NullableSchema.new(params) }
+  let(:nullable_required_subfield_schema) { NullableRequiredSubfieldSchema.new(params) }
 
   describe ".new" do
     context "with an empty params" do
@@ -369,6 +371,160 @@ RSpec.describe SmartParams do
             )
           ]
         )
+      end
+    end
+  end
+
+  describe "nullable values" do
+    context "set to nil" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+          data: nil
+        }
+      end
+
+      it "returns explicit nil" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => nil
+            }
+          )
+        )
+      end
+    end
+
+    context "provided matching data" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+          data: {
+            id: "1",
+            type: "people"
+          }
+        }
+      end
+
+      it "returns matching data" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => hash_including(
+                {
+                  "id" => "1",
+                  "type" => "people"
+                }
+              )
+            }
+          )
+        )
+      end
+    end
+
+    context "not provided" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+        }
+      end
+
+      it "does not set nil relationship" do
+        expect(
+          subject
+        ).to match(
+          hash_excluding(
+            {
+              "data" => nil
+            }
+          )
+        )
+      end
+    end
+
+    context "with non matching subfield data" do
+      subject {nullable_schema.to_hash}
+
+      let(:params) do
+        {
+          data: {
+            is: "garbage"
+          }
+        }
+      end
+
+      it "does not provide data" do
+        expect(
+          subject
+        ).to match(
+          hash_excluding(
+            {
+              "data" => nil
+            }
+          )
+        )
+      end
+    end
+
+    context "specified with unclean data" do
+      subject {nullable_required_subfield_schema.to_hash}
+
+      let(:params) do
+        {
+          # This will raise an exception becase the data hash is specified
+          # but its required subfields are not.
+          data: {
+            is: 'garbage'
+          }
+        }
+      end
+
+      it "checks subfields" do
+        expect {
+          subject
+        }.to raise_exception(SmartParams::Error::InvalidPropertyType)
+      end
+    end
+
+    context "specified as null" do
+      subject {nullable_required_subfield_schema.to_hash}
+
+      let(:params) do
+        {
+          # This will not raise an error, since data is allowed to be null.
+          # Subfields will not be checked.
+          data: nil
+        }
+      end
+
+      it "checks subfields" do
+        expect {
+          subject
+        }.not_to raise_exception
+      end
+    end
+
+    context "unspecified with required subfield" do
+      subject {nullable_required_subfield_schema.to_hash}
+
+      let(:params) do
+        {
+          # In this case, the nullable data hash is not specified so we
+          # don't need to enforce constraints on subfields.
+        }
+      end
+
+      it "allows null value" do
+        expect {
+          subject
+        }.not_to raise_exception
       end
     end
   end

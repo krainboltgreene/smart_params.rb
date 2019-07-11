@@ -21,6 +21,28 @@ class CreateAccountSchema
   end
 end
 
+class NullableSchema
+  include SmartParams
+
+  schema type: Strict::Hash do
+    field :data, type: Strict::Hash | Strict::Nil, nullable: true do
+      field :id, type: Coercible::String.optional
+      field :type, type: Strict::String.optional
+    end
+  end
+end
+
+class NullableRequiredSubfieldSchema
+  include SmartParams
+
+  schema type: Strict::Hash do
+    field :data, type: Strict::Hash, nullable: true do
+      field :id, type: Coercible::String
+      field :type, type: Strict::String
+    end
+  end
+end
+
 RSpec.configure do |let|
   # Enable flags like --only-failures and --next-failure
   let.example_status_persistence_file_path = ".rspec_status"
