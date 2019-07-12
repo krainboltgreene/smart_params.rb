@@ -502,6 +502,7 @@ RSpec.describe SmartParams do
     context "specified as null" do
       subject {nullable_required_subfield_schema.to_hash}
 
+
       let(:params) do
         {
           # This will not raise an error, since data is allowed to be null.

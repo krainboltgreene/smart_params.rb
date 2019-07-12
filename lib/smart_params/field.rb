@@ -92,7 +92,7 @@ module SmartParams
 
     # Should this field be removed from resulting hash?
     def removable?
-      empty? && !allow_empty?
+      !@specified && empty? && !allow_empty?
     end
 
     def weight
