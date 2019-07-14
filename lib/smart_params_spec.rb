@@ -502,7 +502,6 @@ RSpec.describe SmartParams do
     context "specified as null" do
       subject {nullable_required_subfield_schema.to_hash}
 
-
       let(:params) do
         {
           # This will not raise an error, since data is allowed to be null.
@@ -521,6 +520,24 @@ RSpec.describe SmartParams do
         expect {
           subject
         }.not_to raise_exception
+      end
+
+      it "provides clean hash" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => {
+                "id" => "1",
+                "type" => "folders",
+                "relationships" => {
+                  "folder" => nil
+                }
+              }
+            }
+          )
+        )
       end
     end
 
@@ -542,6 +559,57 @@ RSpec.describe SmartParams do
         expect {
           subject
         }.not_to raise_exception
+      end
+
+      it "provides clean hash" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => {
+                "id" => "1",
+                "type" => "folders"
+              }
+            }
+          )
+        )
+      end
+    end
+
+    context "unspecified with specified parent" do
+      subject {nullable_required_subfield_schema.to_hash}
+
+      let(:params) do
+        {
+          data: {
+            id: '1',
+            type: 'folders',
+            relationships: {}
+          }
+        }
+      end
+
+      it "allows null value" do
+        expect {
+          subject
+        }.not_to raise_exception
+      end
+
+      it "provides clean hash" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              "data" => {
+                "id" => "1",
+                "type" => "folders",
+                "relationships" => {}
+              }
+            }
+          )
+        )
       end
     end
   end

@@ -22,7 +22,12 @@ module SmartParams
     end
 
     def deep?
-      return false if nullable? && !!@null
+      # Don't need to visit subfields if this field is nullable and was
+      # passed explicitly as nil
+      return false if nullable? && null?
+      # If a hash is optional, not specified, and is not nullable, don't
+      # consider subfields.
+      return false if type.valid?(nil) && !nullable? && !specified?
       subfields.present?
     end
 
@@ -36,6 +41,10 @@ module SmartParams
 
     def nullable?
       !!@nullable
+    end
+
+    def null?
+      !!@null
     end
 
     def specified?
@@ -67,15 +76,34 @@ module SmartParams
     end
 
     def claim(raw)
-      v = dug(raw)
+      raw_value = dug(raw)
 
-      if v.nil?
+      # If value provided is a hash, check if it's dirty. See #dirty? for
+      # more info.
+      if nullable? && raw_value.is_a?(Hash)
+        others =  raw_value.keys - [keychain.last]
+        @dirty = others.any?
+      end
+
+      # Trace the keychain to find out if the field is explicitly set in the
+      # input hash.
+      at = raw
+      exact = true
+      keychain.each { |key|
+        if at.respond_to?(:key?) && at.key?(key)
+          at = at[key]
+        else
+          exact = false
+          break
+        end
+      }
+      @specified = exact
+
+      if raw_value.nil?
         @null = true
       end
 
-      return type[v] if deep?
-
-      @value = type[v]
+      @value = type[raw_value]
     rescue Dry::Types::ConstraintError => bad_type_exception
       raise SmartParams::Error::InvalidPropertyType, keychain: keychain, wanted: type, raw: if keychain.empty? then raw else raw.dig(*keychain) end
     end
@@ -109,30 +137,6 @@ module SmartParams
     # Very busy method with recent changes. TODO: clean-up
     private def dug(raw)
       return raw if keychain.empty?
-
-      # If value provided is a hash, check if it's dirty. See #dirty? for
-      # more info.
-      if nullable?
-        hash = raw.dig(*keychain)
-        if hash.respond_to?(:keys)
-          others =  hash.keys - [keychain.last]
-          @dirty = others.any?
-        end
-      end
-
-      # Trace the keychain to find out if the field is explicitly set in the
-      # input hash.
-      at = raw
-      exact = true
-      keychain.each { |key|
-        if at.respond_to?(:key?) && at.key?(key)
-          at = at[key]
-        else
-          exact = false
-          break
-        end
-      }
-      @specified = exact
 
       raw.dig(*keychain)
     end
