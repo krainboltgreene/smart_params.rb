@@ -134,7 +134,6 @@ module SmartParams
       @subfields << self.class.new(keychain: [*keychain, key], type: type, nullable: nullable, &subfield)
     end
 
-    # Very busy method with recent changes. TODO: clean-up
     private def dug(raw)
       return raw if keychain.empty?
 
