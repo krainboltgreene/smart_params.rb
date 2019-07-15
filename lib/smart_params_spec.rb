@@ -481,11 +481,11 @@ RSpec.describe SmartParams do
           # This will raise an exception becase the data hash is specified
           # but its required subfields are not.
           data: {
-            id: '1',
-            type: 'folders',
+            id: "1",
+            type: "folders",
             relationships: {
               folder: {
-                is: 'garbage'
+                is: "garbage"
               }
             }
           }
@@ -507,8 +507,8 @@ RSpec.describe SmartParams do
           # This will not raise an error, since data is allowed to be null.
           # Subfields will not be checked.
           data: {
-            id: '1',
-            type: 'folders',
+            id: "1",
+            type: "folders",
             relationships: {
               folder: nil
             }
@@ -549,8 +549,8 @@ RSpec.describe SmartParams do
           # In this case, the nullable data hash is not specified so we
           # don't need to enforce constraints on subfields.
           data: {
-            id: '1',
-            type: 'folders'
+            id: "1",
+            type: "folders"
           }
         }
       end
@@ -583,8 +583,8 @@ RSpec.describe SmartParams do
       let(:params) do
         {
           data: {
-            id: '1',
-            type: 'folders',
+            id: "1",
+            type: "folders",
             relationships: {}
           }
         }
