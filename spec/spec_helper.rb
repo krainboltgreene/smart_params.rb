@@ -54,6 +54,14 @@ class NullableRequiredSubfieldSchema
   end
 end
 
+class SchemaWithDefaults
+  include SmartParams
+
+  schema type: Strict::Hash do
+    field :password, type: Strict::String.default { 'password' }
+  end
+end
+
 RSpec.configure do |let|
   # Enable flags like --only-failures and --next-failure
   let.example_status_persistence_file_path = ".rspec_status"

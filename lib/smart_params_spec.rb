@@ -375,6 +375,20 @@ RSpec.describe SmartParams do
     end
   end
 
+  describe "default values" do
+    subject { SchemaWithDefaults.new({}).to_hash }
+
+    it "returns default values" do
+      expect(subject).to match(
+        hash_including(
+          {
+            "password" => "password"
+          }
+        )
+      )
+    end
+  end
+
   describe "nullable values" do
     context "set to nil" do
       subject {nullable_schema.to_hash}
