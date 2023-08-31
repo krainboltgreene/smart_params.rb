@@ -60,7 +60,9 @@ module SmartParams
   delegate :dig, to: :to_hash
   delegate :to_s, to: :to_hash
 
-  def respond_to_missing? = true
+  def respond_to_missing?(name, include_private = false)
+    payload.respond_to?(name) || super
+  end
 
   def method_missing(name, *arguments, &)
     if payload.respond_to?(name)
