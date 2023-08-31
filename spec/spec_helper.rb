@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "pry"
 require "smart_params"
 require "securerandom"
@@ -55,7 +57,7 @@ RSpec.configure do |let|
 
   # Only run a specific file, using the ENV variable
   # Example: FILE=lib/strong_params/version_spec.rb bundle exec rake
-  let.pattern = ENV["FILE"]
+  let.pattern = ENV.fetch("FILE", nil)
 
   # Show the slowest examples in the suite
   let.profile_examples = true

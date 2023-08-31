@@ -43,3 +43,5 @@ Performance/MethodObjectAsBlock:
   Enabled: false
 Style/AccessModifierDeclarations:
   EnforcedStyle: inline
+RSpec/MultipleExpectations:
+  Enabled: false

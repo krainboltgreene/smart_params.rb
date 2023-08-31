@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
 RSpec.describe SmartParams do
@@ -10,25 +12,25 @@ RSpec.describe SmartParams do
       let(:params) { {} }
 
       it "throws an error with a message detailing the invalid property type and given properties" do
-        expect {schema}.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but was nil")
+        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but was nil")
       end
 
       it "throws an error with the missing property and given properties" do
-        expect {schema}.to raise_exception do |exception|
+        expect { schema }.to raise_exception do |exception|
           expect(exception).to have_attributes(keychain: [:data], wanted: SmartParams::Strict::Hash, raw: nil)
         end
       end
     end
 
     context "with a good key but bad type" do
-      let(:params) { {data: ""} }
+      let(:params) { { data: "" } }
 
       it "throws an error with a message detailing the invalid property, expected type, given type, and given value" do
         expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but was \"\"")
       end
 
       it "throws an error with the invalid property, expected type, given type, and given value" do
-        expect {schema }.to raise_exception do |exception|
+        expect { schema }.to raise_exception do |exception|
           expect(exception).to have_attributes(keychain: [:data], wanted: SmartParams::Strict::Hash, raw: "")
         end
       end
@@ -36,7 +38,7 @@ RSpec.describe SmartParams do
   end
 
   describe "#payload" do
-    subject {schema.payload}
+    subject { schema.payload }
 
     context "with a reasonably good params" do
       let(:params) do
@@ -57,7 +59,7 @@ RSpec.describe SmartParams do
                 id: "a",
                 type: "widget",
                 attributes: {
-                  title: "Widget A",
+                  title: "Widget A"
                 }
               }
             }
@@ -74,7 +76,7 @@ RSpec.describe SmartParams do
       end
 
       it "has a chain path data.attributes.password" do
-        expect(subject.data.attributes.password).to be_kind_of(String)
+        expect(subject.data.attributes.password).to be_a(String)
       end
 
       it "has a chain path meta.jsonapi_version" do
@@ -108,11 +110,11 @@ RSpec.describe SmartParams do
                 "type" => "accounts",
                 "attributes" => hash_including(
                   {
-                    "email" => "kurtis@example.com",
+                    "email" => "kurtis@example.com"
                   }
                 )
               }
-            ),
+            )
           }
         )
       end
@@ -146,7 +148,7 @@ RSpec.describe SmartParams do
                   }
                 )
               }
-            ),
+            )
           }
         )
       end
@@ -171,7 +173,7 @@ RSpec.describe SmartParams do
                 id: "a",
                 type: "widget",
                 attributes: {
-                  title: "Widget A",
+                  title: "Widget A"
                 }
               }
             }
@@ -218,19 +220,19 @@ RSpec.describe SmartParams do
   end
 
   describe "#to_hash" do
-    subject {schema.to_hash}
+    subject { schema.to_hash }
 
     include_examples "native types"
   end
 
   describe "#as_json" do
-    subject {schema.as_json}
+    subject { schema.as_json }
 
     include_examples "native types"
   end
 
   describe "#fetch" do
-    subject {schema.fetch("data")}
+    subject { schema.fetch("data") }
 
     context "with a reasonably good params" do
       let(:params) do
@@ -251,7 +253,7 @@ RSpec.describe SmartParams do
                 id: "a",
                 type: "widget",
                 attributes: {
-                  title: "Widget A",
+                  title: "Widget A"
                 }
               }
             }
@@ -280,7 +282,7 @@ RSpec.describe SmartParams do
   end
 
   describe "#dig" do
-    subject {schema.dig("data", "attributes", "email")}
+    subject { schema.dig("data", "attributes", "email") }
 
     context "with a reasonably good params" do
       let(:params) do
@@ -300,7 +302,7 @@ RSpec.describe SmartParams do
                 id: "a",
                 type: "widget",
                 attributes: {
-                  title: "Widget A",
+                  title: "Widget A"
                 }
               }
             }
@@ -319,7 +321,7 @@ RSpec.describe SmartParams do
   end
 
   describe "#fetch_values" do
-    subject {schema.fetch_values("data", "meta")}
+    subject { schema.fetch_values("data", "meta") }
 
     context "with a reasonably good params" do
       let(:params) do
@@ -340,7 +342,7 @@ RSpec.describe SmartParams do
                 id: "a",
                 type: "widget",
                 attributes: {
-                  title: "Widget A",
+                  title: "Widget A"
                 }
               }
             }
@@ -376,8 +378,8 @@ RSpec.describe SmartParams do
   end
 
   describe "nullable values" do
-    context "set to nil" do
-      subject {nullable_schema.to_hash}
+    context "when set to nil" do
+      subject { nullable_schema.to_hash }
 
       let(:params) do
         {
@@ -398,8 +400,8 @@ RSpec.describe SmartParams do
       end
     end
 
-    context "provided matching data" do
-      subject {nullable_schema.to_hash}
+    context "when provided matching data" do
+      subject { nullable_schema.to_hash }
 
       let(:params) do
         {
@@ -428,12 +430,11 @@ RSpec.describe SmartParams do
       end
     end
 
-    context "not provided" do
-      subject {nullable_schema.to_hash}
+    context "when not provided" do
+      subject { nullable_schema.to_hash }
 
       let(:params) do
-        {
-        }
+        {}
       end
 
       it "does not set nil relationship" do
@@ -450,7 +451,7 @@ RSpec.describe SmartParams do
     end
 
     context "with non matching subfield data" do
-      subject {nullable_schema.to_hash}
+      subject { nullable_schema.to_hash }
 
       let(:params) do
         {
@@ -473,28 +474,28 @@ RSpec.describe SmartParams do
       end
     end
 
-    context "specified with unclean data" do
-      subject {nullable_required_subfield_schema.to_hash}
+    context "when specified with unclean data" do
+      subject { nullable_required_subfield_schema.to_hash }
 
       let(:params) do
         {
           # This will raise an exception becase the data hash is specified
           # but its required subfields are not.
           data: {
-            is: 'garbage'
+            is: "garbage"
           }
         }
       end
 
       it "checks subfields" do
-        expect {
+        expect do
           subject
-        }.to raise_exception(SmartParams::Error::InvalidPropertyType)
+        end.to raise_exception(SmartParams::Error::InvalidPropertyType)
       end
     end
 
-    context "specified as null" do
-      subject {nullable_required_subfield_schema.to_hash}
+    context "when specified as null" do
+      subject { nullable_required_subfield_schema.to_hash }
 
       let(:params) do
         {
@@ -505,14 +506,14 @@ RSpec.describe SmartParams do
       end
 
       it "checks subfields" do
-        expect {
+        expect do
           subject
-        }.not_to raise_exception
+        end.not_to raise_exception
       end
     end
 
-    context "unspecified with required subfield" do
-      subject {nullable_required_subfield_schema.to_hash}
+    context "when unspecified with required subfield" do
+      subject { nullable_required_subfield_schema.to_hash }
 
       let(:params) do
         {
@@ -522,9 +523,9 @@ RSpec.describe SmartParams do
       end
 
       it "allows null value" do
-        expect {
+        expect do
           subject
-        }.not_to raise_exception
+        end.not_to raise_exception
       end
     end
   end

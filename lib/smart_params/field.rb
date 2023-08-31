@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SmartParams
   class Field
     attr_reader :keychain
@@ -12,20 +14,21 @@ module SmartParams
       @specified = false
       @dirty = false
 
-      if block_given?
-        instance_eval(&nesting)
-      end
+      return unless nesting
+
+      instance_eval(&nesting)
     end
 
     def deep?
       # We check @specified directly because we want to know if ANY
       # subfields have been passed, not just ones that match the schema.
-      return false if nullable? && !!@specified
+      return false if nullable? && @specified
+
       subfields.present?
     end
 
     def root?
-      keychain.size == 0
+      keychain.empty?
     end
 
     def value
@@ -53,23 +56,24 @@ module SmartParams
 
     def clean?
       return false if dirty?
-      return true if empty? || subfields.select { |sub| !sub.empty? }.any?
+      return true if empty? || subfields.reject(&:empty?).any?
+
       false
     end
 
     # Check if we should consider this value even when empty.
     def allow_empty?
       return true if specified? && nullable?
-      return subfields.select(&:allow_empty?).any?
-      false
+
+      subfields.any?(&:allow_empty?)
     end
 
     def claim(raw)
       return type[dug(raw)] if deep?
 
       @value = type[dug(raw)]
-    rescue Dry::Types::ConstraintError => bad_type_exception
-      raise SmartParams::Error::InvalidPropertyType, keychain: keychain, wanted: type, raw: if keychain.empty? then raw else raw.dig(*keychain) end
+    rescue Dry::Types::ConstraintError
+      raise SmartParams::Error::InvalidPropertyType.new(keychain:, wanted: type, raw: keychain.empty? ? raw : raw.dig(*keychain))
     end
 
     def to_hash
@@ -92,10 +96,8 @@ module SmartParams
     end
 
     private def field(key, type:, nullable: false, &subfield)
-      if nullable
-        type |= SmartParams::Strict::Nil
-      end
-      @subfields << self.class.new(keychain: [*keychain, key], type: type, nullable: nullable, &subfield)
+      type |= SmartParams::Strict::Nil if nullable
+      @subfields << self.class.new(keychain: [*keychain, key], type:, nullable:, &subfield)
     end
 
     # Very busy method with recent changes. TODO: clean-up
@@ -107,7 +109,7 @@ module SmartParams
       if nullable?
         hash = raw.dig(*keychain)
         if hash.respond_to?(:keys)
-          others =  hash.keys - [keychain.last]
+          others = hash.keys - [keychain.last]
           @dirty = others.any?
         end
       end
@@ -116,14 +118,14 @@ module SmartParams
       # input hash.
       at = raw
       exact = true
-      keychain.each { |key|
+      keychain.each do |key|
         if at.respond_to?(:key?) && at.key?(key)
           at = at[key]
         else
           exact = false
           break
         end
-      }
+      end
       @specified = exact
 
       raw.dig(*keychain)

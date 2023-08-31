@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SmartParams
   class Error
     class InvalidPropertyType < Error
@@ -6,6 +8,7 @@ module SmartParams
       attr_reader :raw
 
       def initialize(keychain:, wanted:, raw:)
+        super
         @keychain = keychain
         @wanted = wanted
         @raw = raw

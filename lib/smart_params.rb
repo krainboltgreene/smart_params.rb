@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "dry-types"
 require "recursive-open-struct"
 require "active_support/concern"
@@ -20,11 +22,12 @@ module SmartParams
     @safe = safe
     @raw = raw
     @schema = self.class.instance_variable_get(:@schema)
-    @fields = [@schema, *unfold(@schema.subfields)].sort_by(&:weight).each { |field| field.claim(raw) }
-  rescue SmartParams::Error::InvalidPropertyType => invalid_property_type_exception
-    raise invalid_property_type_exception if safe?
 
-    @exception = invalid_property_type_exception
+    @fields = [@schema, *unfold(@schema.subfields)].sort_by(&:weight).each { |field| field.claim(raw) }
+  rescue SmartParams::Error::InvalidPropertyType => e
+    raise e if safe?
+
+    @exception = e
   end
 
   def payload
@@ -42,7 +45,7 @@ module SmartParams
       structure.as_json(options) || {}
     end
   end
-  alias_method :as_json, :to_hash
+  alias as_json to_hash
 
   delegate :[], to: :to_hash
   delegate :fetch, to: :to_hash
@@ -57,7 +60,9 @@ module SmartParams
   delegate :dig, to: :to_hash
   delegate :to_s, to: :to_hash
 
-  def method_missing(name, *arguments, &block)
+  def respond_to_missing? = true
+
+  def method_missing(name, *arguments, &)
     if payload.respond_to?(name)
       payload.public_send(name)
     else
@@ -77,7 +82,7 @@ module SmartParams
   private def unfold(subfields)
     subfields.to_a.reduce([]) do |list, field|
       if field.deep?
-        [*list, field, *unfold(field.subfields)]
+        [*list, field, *unfold(field.subfields.to_a)]
       else
         [*list, field]
       end
@@ -90,7 +95,7 @@ module SmartParams
 
   class_methods do
     def schema(type:, &subfield)
-      @schema = Field.new(keychain: [], type: type, &subfield)
+      @schema = Field.new(keychain: [], type:, &subfield)
     end
   end
 end

@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require_relative "lib/smart_params/version"
 
@@ -7,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version = SmartParams::VERSION
   spec.authors = ["Kurtis Rainbolt-Greene"]
   spec.email = ["kurtis@rainbolt-greene.online"]
-  spec.summary = %q{Apply an organized and easy to maintain schema to request params}
+  spec.summary = "Apply an organized and easy to maintain schema to request params"
   spec.description = spec.summary
   spec.homepage = "https://github.com/krainboltgreene/smart_params.rb"
   spec.license = "HL3"
@@ -19,4 +20,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "activesupport"
   spec.add_runtime_dependency "dry-types"
   spec.add_runtime_dependency "recursive-open-struct"
+  spec.metadata["rubygems_mfa_required"] = "true"
 end
