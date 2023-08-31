@@ -1,10 +1,5 @@
 # smart_params
 
-  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/smart_params.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/smart_params.rb)
-  - [![Downloads](http://img.shields.io/gem/dtv/smart_params.svg?style=flat-square)](https://rubygems.org/gems/smart_params)
-  - [![Version](http://img.shields.io/gem/v/smart_params.svg?style=flat-square)](https://rubygems.org/gems/smart_params)
-
-
 Work smart, not strong. This gem gives developers an easy to understand and easy to maintain schema for request parameters. Meant as a drop-in replacement for strong_params.
 
 
@@ -109,11 +104,11 @@ For more information on what types and options you can use, please read: http://
 
 Okay so sure strong_params exists and it's definitely better than `attr_accessible` (if you remember that mess), but it often leaves you with code like this:
 
-https://github.com/diaspora/diaspora/blob/develop/app/controllers/users_controller.rb#L140-L158
+https://github.com/diaspora/diaspora/blob/744f5449fb7bfd1ac2bfd50d2e157d97c77a3bca/app/controllers/users_controller.rb#L132
 
 Which while fine to start with usually evolves into:
 
-https://github.com/discourse/discourse/blob/master/app/controllers/posts_controller.rb#L592-L677
+https://github.com/discourse/discourse/blob/82a56334a3099297d14e1a0355e8ad19e61631e3/app/controllers/application_controller.rb#L565
 
 None of this is very maintainable and it's definitely not easy to teach. So my solution is to follow the wake of other libraries: Define a maintainable interface that can be easily tested and easily integrated. It doesn't require wholesale adoption nor is it hard to remove.
 
@@ -130,13 +125,9 @@ Your model is already complex enough and it doesn't need the added baggage of fi
 
 ## Installing
 
-Add this line to your application's Gemfile:
+Run this command:
 
-    gem "smart_params", "2.0.7"
-
-And then execute:
-
-    $ bundle
+    $ bundle add smart_params
 
 Or install it yourself with:
 
@@ -145,7 +136,7 @@ Or install it yourself with:
 
 ## Contributing
 
-  1. Read the [Code of Conduct](/CONDUCT.md)
+  1. Read the [Code of Conduct](/CONDUCT)
   2. Fork it
   3. Create your feature branch (`git checkout -b my-new-feature`)
   4. Test your code: `rake spec`

@@ -1,0 +1,32 @@
+name: Tests & Linting
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name || github.run_id }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches:
+      - main
+      - "!revert-**"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - name: Rubocop check
+        run: bundle exec rubocop --cache true --display-only-fail-level-offenses --extra-details lib/
+      - name: Run tests
+        run: bundle exec rspec --backtrace --profile 10 lib/**/*_spec.rb
