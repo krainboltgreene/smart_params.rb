@@ -18,10 +18,10 @@ module SmartParams
   attr_reader :schema
   attr_reader :fields
 
-  def initialize(raw, safe: true)
+  def initialize(raw, safe: true, name: :default)
     @safe = safe
     @raw = raw
-    @schema = self.class.instance_variable_get(:@schema)
+    @schema = self.class.instance_variable_get(:@schema)[name]
 
     @fields = [@schema, *unfold(@schema.subfields)].sort_by(&:weight).each { |field| field.claim(raw) }
   rescue SmartParams::Error::InvalidPropertyType => e
@@ -96,8 +96,9 @@ module SmartParams
   end
 
   class_methods do
-    def schema(type:, &subfield)
-      @schema = Field.new(keychain: [], type:, &subfield)
+    def schema(name: :default, type:, &definitions)
+      @schema ||= {}
+      @schema[name] = Field.new(keychain: [], type:, &definitions)
     end
   end
 end
