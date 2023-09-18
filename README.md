@@ -11,19 +11,19 @@ So lets say you have a complex set of incoming data, say a JSON:API-specificatio
 class CreateAccountSchema
   include SmartParams
 
-  schema type: Strict::Hash do
-    field :data, type: Strict::Hash do
-      field :id, type: Coercible::String.optional
+  schema do
+    field :data, subschema: true do
+      field :id, type: Coercible::String, nullable: true
       field :type, type: Strict::String
-      field :attributes, type: Strict::Hash.optional do
-        field :email, type: Strict::String.optional
-        field :username, type: Strict::String.optional
-        field :name, type: Strict::String.optional
-        field :password, type: Strict::String.optional.default { SecureRandom.hex(32) }
+      field :attributes, subschema: true, nullable: true do
+        field :email, type: Strict::String, nullable: true
+        field :username, type: Strict::String, nullable: true
+        field :name, type: Strict::String, nullable: true
+        field :password, type: Strict::String.default { SecureRandom.hex(32) }, nullable: true
       end
     end
-    field :meta, type: Strict::Hash.optional
-    field :included, type: Strict::Array.optional
+    field :meta, Strict::Hash, nullable: true
+    field :included, type: Strict::Array, nullable: true
   end
 end
 ```

@@ -45,3 +45,5 @@ Style/AccessModifierDeclarations:
   EnforcedStyle: inline
 RSpec/MultipleExpectations:
   Enabled: false
+Naming/RescuedExceptionsVariableName:
+  Enabled: false

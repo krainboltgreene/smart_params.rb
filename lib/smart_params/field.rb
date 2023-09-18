@@ -5,18 +5,36 @@ module SmartParams
     attr_reader :keychain
     attr_reader :subfields
     attr_reader :type
+    attr_reader :nullable
+    attr_reader :key
 
-    def initialize(keychain:, type:, nullable: false, &nesting)
+    def inspect
+      "#<#{self.class.name}:#{__id__} #{[
+        ('subschema' if @subschema),
+        ("#/#{@keychain.join('/')}" if @keychain),
+        ("-> #{type.name}" if @type),
+        ("= #{@value.inspect}" if @value)
+      ].compact.join(' ')}>"
+    end
+
+    def initialize(keychain:, type:, key: nil, subschema: false, nullable: false, &nesting)
+      @key = key
       @keychain = Array(keychain)
       @subfields = Set.new
       @type = type
       @nullable = nullable
+      @subschema = subschema
       @specified = false
       @dirty = false
 
-      return unless nesting
+      instance_eval(&nesting) if nesting
 
-      instance_eval(&nesting)
+      if subschema
+        @type = @type.schema(subfields.reduce({}) do |mapping, field|
+          mapping.merge("#{field.key}#{'?' if field.nullable}": field.type)
+        end).with_key_transform(&:to_sym)
+      end
+      @type = @type.optional if nullable
     end
 
     def deep?
@@ -72,8 +90,10 @@ module SmartParams
       return type[dug(raw)] if deep?
 
       @value = type[dug(raw)]
-    rescue Dry::Types::ConstraintError
+    rescue Dry::Types::ConstraintError => _constraint_exception
       raise SmartParams::Error::InvalidPropertyType.new(keychain:, wanted: type, raw: keychain.empty? ? raw : raw.dig(*keychain))
+    rescue Dry::Types::MissingKeyError => missing_key_exception
+      raise SmartParams::Error::InvalidPropertyType.new(keychain:, wanted: type, raw: keychain.empty? ? raw : raw.dig(*keychain), missing_key: missing_key_exception.key)
     end
 
     def to_hash
@@ -95,9 +115,8 @@ module SmartParams
       keychain.map(&:to_s)
     end
 
-    private def field(key, type:, nullable: false, &subfield)
-      type |= SmartParams::Strict::Nil if nullable
-      @subfields << self.class.new(keychain: [*keychain, key], type:, nullable:, &subfield)
+    private def field(key, subschema: false, type: SmartParams::Hash, nullable: false, &subfield)
+      @subfields << self.class.new(key:, keychain: [*keychain, key], type:, nullable:, subschema:, &subfield)
     end
 
     # Very busy method with recent changes. TODO: clean-up

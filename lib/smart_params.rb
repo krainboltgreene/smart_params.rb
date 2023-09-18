@@ -24,10 +24,14 @@ module SmartParams
     @schema = self.class.instance_variable_get(:@schema)[name]
 
     @fields = [@schema, *unfold(@schema.subfields)].sort_by(&:weight).each { |field| field.claim(raw) }
-  rescue SmartParams::Error::InvalidPropertyType => e
-    raise e if safe?
+  rescue SmartParams::Error::InvalidPropertyType => invalid_property_exception
+    raise invalid_property_exception if safe?
 
-    @exception = e
+    @exception = invalid_property_exception
+  end
+
+  def inspect
+    "#<#{self.class.name}:#{__id__} @fields=#{@fields.inspect} @raw=#{@raw.inspect}>"
   end
 
   def payload
@@ -96,9 +100,9 @@ module SmartParams
   end
 
   class_methods do
-    def schema(name: :default, type:, &definitions)
+    def schema(name: :default, type: Hash, subschema: false, &definitions)
       @schema ||= {}
-      @schema[name] = Field.new(keychain: [], type:, &definitions)
+      @schema[name] = Field.new(keychain: [], type:, subschema:, &definitions)
     end
   end
 end

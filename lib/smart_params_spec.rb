@@ -12,12 +12,12 @@ RSpec.describe SmartParams do
       let(:params) { {} }
 
       it "throws an error with a message detailing the invalid property type and given properties" do
-        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but was nil")
+        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but is nil")
       end
 
       it "throws an error with the missing property and given properties" do
         expect { schema }.to raise_exception do |exception|
-          expect(exception).to have_attributes(keychain: [:data], wanted: SmartParams::Strict::Hash, raw: nil)
+          expect(exception).to have_attributes(keychain: [:data], wanted: a_kind_of(Dry::Types::Constrained), raw: nil)
         end
       end
     end
@@ -26,12 +26,12 @@ RSpec.describe SmartParams do
       let(:params) { { data: "" } }
 
       it "throws an error with a message detailing the invalid property, expected type, given type, and given value" do
-        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but was \"\"")
+        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but is \"\"")
       end
 
       it "throws an error with the invalid property, expected type, given type, and given value" do
         expect { schema }.to raise_exception do |exception|
-          expect(exception).to have_attributes(keychain: [:data], wanted: SmartParams::Strict::Hash, raw: "")
+          expect(exception).to have_attributes(keychain: [:data], wanted: a_kind_of(Dry::Types::Constrained), raw: "")
         end
       end
     end
@@ -456,18 +456,20 @@ RSpec.describe SmartParams do
       let(:params) do
         {
           data: {
+            id: "x",
+            type: "y",
             is: "garbage"
           }
         }
       end
 
-      it "does not provide data" do
+      it "does not return key that isn't specified" do
         expect(
           subject
         ).to match(
           hash_excluding(
             {
-              "data" => nil
+              "is" => "garbage"
             }
           )
         )

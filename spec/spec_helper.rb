@@ -7,29 +7,29 @@ require "securerandom"
 class CreateAccountSchema
   include SmartParams
 
-  schema type: Strict::Hash do
-    field :data, type: Strict::Hash do
-      field :id, type: Coercible::String.optional
+  schema do
+    field :data, subschema: true do
+      field :id, type: Coercible::String, nullable: true
       field :type, type: Strict::String
-      field :attributes, type: Strict::Hash.optional do
-        field :email, type: Strict::String.optional
-        field :username, type: Strict::String.optional
-        field "full-name", type: Strict::String.optional
-        field :password, type: Strict::String.optional.default { SecureRandom.hex(32) }
+      field :attributes, subschema: true, nullable: true do
+        field :email, type: Strict::String, nullable: true
+        field :username, type: Strict::String, nullable: true
+        field "full-name", type: Strict::String, nullable: true
+        field :password, type: Strict::String.default { SecureRandom.hex(32) }, nullable: true
       end
     end
-    field :meta, type: Strict::Hash.optional
-    field :included, type: Strict::Array.optional
+    field :meta, type: Strict::Hash, nullable: true
+    field :included, type: Strict::Array, nullable: true
   end
 end
 
 class NullableSchema
   include SmartParams
 
-  schema type: Strict::Hash do
-    field :data, type: Strict::Hash | Strict::Nil, nullable: true do
-      field :id, type: Coercible::String.optional
-      field :type, type: Strict::String.optional
+  schema do
+    field :data, subschema: true, nullable: true do
+      field :id, type: Coercible::String, nullable: true
+      field :type, type: Strict::String, nullable: true
     end
   end
 end
@@ -37,10 +37,10 @@ end
 class NullableRequiredSubfieldSchema
   include SmartParams
 
-  schema type: Strict::Hash do
-    field :data, type: Strict::Hash, nullable: true do
+  schema do
+    field :data, subschema: true, nullable: true do
       field :id, type: Coercible::String
-      field :type, type: Strict::String
+      field :type, type: Strict::String, nullable: true
     end
   end
 end
