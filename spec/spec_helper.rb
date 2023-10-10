@@ -11,7 +11,7 @@ class CreateAccountSchema
     field :data, subschema: true do
       field :id, type: Coercible::String, nullable: true
       field :type, type: Strict::String
-      field :attributes, subschema: true, nullable: true do
+      subschema :attributes, nullable: true do
         field :email, type: Strict::String, nullable: true
         field :username, type: Strict::String, nullable: true
         field "full-name", type: Strict::String, nullable: true

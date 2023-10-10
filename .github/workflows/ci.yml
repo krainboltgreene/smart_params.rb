@@ -29,4 +29,4 @@ jobs:
       - name: Rubocop check
         run: bundle exec rubocop --cache true --display-only-fail-level-offenses --extra-details lib/
       - name: Run tests
-        run: bundle exec rspec --backtrace --profile 10 lib/**/*_spec.rb
+        run: bundle exec rake spec

@@ -119,6 +119,10 @@ module SmartParams
       @subfields << self.class.new(key:, keychain: [*keychain, key], type:, nullable:, subschema:, &subfield)
     end
 
+    private def subschema(key, nullable: false, &subfield)
+      field(key, subschema: true, type: SmartParams::Hash, nullable:, &subfield)
+    end
+
     # Very busy method with recent changes. TODO: clean-up
     private def dug(raw)
       return raw if keychain.empty?

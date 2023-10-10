@@ -100,9 +100,9 @@ module SmartParams
   end
 
   class_methods do
-    def schema(name: :default, type: Hash, subschema: false, &definitions)
+    def schema(name: :default, &definitions)
       @schema ||= {}
-      @schema[name] = Field.new(keychain: [], type:, subschema:, &definitions)
+      @schema[name] = Field.new(keychain: [], type: SmartParams::Hash, subschema: false, &definitions)
     end
   end
 end
