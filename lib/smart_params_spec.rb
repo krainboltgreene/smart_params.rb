@@ -16,7 +16,7 @@ RSpec.describe SmartParams do
       end
 
       it "throws an error with the missing property and given properties" do
-        expect { schema }.to raise_exception do |exception|
+        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType) do |exception|
           expect(exception).to have_attributes(keychain: [:data], wanted: a_kind_of(Dry::Types::Constrained), raw: nil)
         end
       end
@@ -30,7 +30,21 @@ RSpec.describe SmartParams do
       end
 
       it "throws an error with the invalid property, expected type, given type, and given value" do
-        expect { schema }.to raise_exception do |exception|
+        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType) do |exception|
+          expect(exception).to have_attributes(keychain: [:data], wanted: a_kind_of(Dry::Types::Constrained), raw: "")
+        end
+      end
+    end
+
+    context "with multiple issues" do
+      let(:params) { { data: {y: 2, attributes: ""}, id: nil } }
+
+      it "throws an error with a message detailing the invalid property, expected type, given type, and given value" do
+        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but is \"\"")
+      end
+
+      it "throws an error with the invalid property, expected type, given type, and given value" do
+        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType) do |exception|
           expect(exception).to have_attributes(keychain: [:data], wanted: a_kind_of(Dry::Types::Constrained), raw: "")
         end
       end

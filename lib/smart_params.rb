@@ -24,10 +24,15 @@ module SmartParams
     @schema = self.class.instance_variable_get(:@schema)[name]
 
     @fields = [@schema, *unfold(@schema.subfields)].sort_by(&:weight).each { |field| field.claim(raw) }
+    binding.pry
   rescue SmartParams::Error::InvalidPropertyType => invalid_property_exception
     raise invalid_property_exception if safe?
 
     @exception = invalid_property_exception
+  end
+
+  def errors
+    fields.flat_map(&:errors).compact
   end
 
   def inspect
