@@ -47,3 +47,5 @@ RSpec/MultipleExpectations:
   Enabled: false
 Naming/RescuedExceptionsVariableName:
   Enabled: false
+RSpec/NestedGroups:
+  Enabled: false

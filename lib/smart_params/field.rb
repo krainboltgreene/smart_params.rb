@@ -7,6 +7,7 @@ module SmartParams
     attr_reader :type
     attr_reader :nullable
     attr_reader :key
+    attr_reader :errors
 
     def inspect
       "#<#{self.class.name}:#{__id__} #{[
@@ -26,6 +27,7 @@ module SmartParams
       @subschema = subschema
       @specified = false
       @dirty = false
+      @errors = []
 
       instance_eval(&nesting) if nesting
 
@@ -87,13 +89,17 @@ module SmartParams
     end
 
     def claim(raw)
-      return type[dug(raw)] if deep?
+      dug_value = dug(raw)
+      return type[dug_value] if deep?
 
-      @value = type[dug(raw)]
+      @value = type[dug_value]
+    rescue Dry::Types::SchemaError => schema_exception
+      # binding.pry
+      # @value = type[dug_value]
     rescue Dry::Types::ConstraintError => _constraint_exception
-      raise SmartParams::Error::InvalidPropertyType.new(keychain:, wanted: type, raw: keychain.empty? ? raw : raw.dig(*keychain))
+      @errors << SmartParams::Error::InvalidPropertyType.new(keychain:, wanted: type, raw: keychain.empty? ? raw : dug_value)
     rescue Dry::Types::MissingKeyError => missing_key_exception
-      raise SmartParams::Error::InvalidPropertyType.new(keychain:, wanted: type, raw: keychain.empty? ? raw : raw.dig(*keychain), missing_key: missing_key_exception.key)
+      @errors << SmartParams::Error::InvalidPropertyType.new(keychain:, wanted: type, raw: keychain.empty? ? raw : dug_value, missing_key: missing_key_exception.key)
     end
 
     def to_hash
@@ -130,7 +136,7 @@ module SmartParams
       # If value provided is a hash, check if it's dirty. See #dirty? for
       # more info.
       if nullable?
-        hash = raw.dig(*keychain)
+        hash = dig_carefuly(raw, keychain)
         if hash.respond_to?(:keys)
           others = hash.keys - [keychain.last]
           @dirty = others.any?
@@ -151,7 +157,24 @@ module SmartParams
       end
       @specified = exact
 
-      raw.dig(*keychain)
+      dig_carefuly(raw, keychain)
+    end
+
+    private def dig_carefuly(raw, keychain)
+      terminal_states = [:unfetchable, :missing_key]
+      keychain.reduce([:ok, raw, raw]) do |(state, previous, current), key|
+        next [state, previous, current] if terminal_states.include?(state)
+        next [:unfetchable, previous, current] unless current.respond_to?(:fetch)
+        next [:missing_key, previous, current] unless current.key?(key)
+
+        [:ok, current, current.fetch(key)]
+      end.then do |(state, previous, value)|
+        case state
+        when :unfetchable then [state, previous, value]
+        when :missing_key then [state, previous, previous]
+        else value
+        end
+      end
     end
   end
 end
