@@ -39,8 +39,10 @@ module SmartParams
       case field.map(raw)
       in :skip
         [result, failures]
-      in [:ok, value]
-        [field.update_in(result, value), failures]
+      in [:ok, nil]
+        [field.update_in(result, nil), failures]
+      in [:ok, _value]
+        [field.update_in(result, {}), failures]
       in Dry::Types::Result::Success => success
         [field.update_in(result, success.input), failures]
       in Dry::Types::Result::Failure => failure

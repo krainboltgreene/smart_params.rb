@@ -155,22 +155,6 @@ RSpec.describe SmartParams do
           )
         )
       end
-
-      it "has a chain path data.type" do
-        expect(subject[:data][:type]).to eq("accounts")
-      end
-
-      it "has a chain path data.attributes.email" do
-        expect(subject[:data][:attributes][:email]).to eq("kurtis@example.com")
-      end
-
-      it "has a chain path data.attributes.password" do
-        expect(subject[:data][:attributes][:password]).to be_a(String)
-      end
-
-      it "has a chain path meta.jsonapi_version" do
-        expect(subject[:meta][:jsonapi_version]).to eq("1.0")
-      end
     end
 
     context "with extra params" do
@@ -187,7 +171,26 @@ RSpec.describe SmartParams do
         }
       end
 
-      it "returns as native data types" do
+      it "excludes keys not defined" do
+        expect(
+          subject
+        ).to match(
+          {
+            data: hash_excluding(
+              {
+                x: "x",
+                attributes: hash_including(
+                  {
+                    y: "y"
+                  }
+                )
+              }
+            )
+          }
+        )
+      end
+
+      it "includes the keys defined" do
         expect(
           subject
         ).to match(

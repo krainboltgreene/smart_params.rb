@@ -1,6 +1,16 @@
 # Changelog
 
 
+## 6.0.3
+
+  - [bug] When dealing with a hash it would automatically insert the value into the result, instead of simply creating the entry point.
+
+
+## 6.0.2
+
+  - [bug] Accidentally fogot to require the new exceptions in previous patch
+
+
 ## 6.0.1
 
   - [bug] Found two exceptions that hadn't been property referenced `MissingTypeAnnotationException` and `PathAlreadyDefinedException`

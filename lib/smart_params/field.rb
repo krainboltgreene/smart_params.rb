@@ -29,11 +29,11 @@ module SmartParams
     def update_in(result, value)
       *body, butt = @path
 
-      body.reduce(result) do |mapping, key|
-        mapping[key]
-      end.store(butt, value)
-
-      result
+      result.dup.tap do |tree|
+        body.reduce(tree) do |mapping, key|
+          mapping[key]
+        end.store(butt, value)
+      end
     end
 
     private def dig_until(keychain, raw)
