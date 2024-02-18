@@ -3,7 +3,7 @@ module SmartParams
     def initialize(namespace:, available:)
       @namespace = namespace
       @available = available
-      super()
+      super(message)
     end
 
     def message

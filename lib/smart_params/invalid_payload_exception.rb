@@ -1,8 +1,10 @@
 module SmartParams
   class InvalidPayloadException < StandardError
+    attr_reader :failures
+
     def initialize(failures:)
       @failures = failures
-      super()
+      super(message)
     end
 
     def message

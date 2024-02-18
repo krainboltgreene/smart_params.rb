@@ -2,10 +2,13 @@
 
 module SmartParams
   class MissingPropertyException < StandardError
+    attr_accessor :path
+    attr_accessor :last
+
     def initialize(path:, last:)
       @path = path
       @last = last
-      super()
+      super(message)
     end
 
     def message

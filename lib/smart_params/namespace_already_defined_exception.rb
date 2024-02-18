@@ -2,7 +2,7 @@ module SmartParams
   class NamespaceAlreadyDefinedException < StandardError
     def initialize(namespace:)
       @namespace = namespace
-      super()
+      super(message)
     end
 
     def message

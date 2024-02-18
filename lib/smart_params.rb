@@ -41,6 +41,8 @@ module SmartParams
         [field.update_in(result, value), failures]
       in Dry::Types::Result::Success => success
         [field.update_in(result, success.input), failures]
+      in Dry::Types::Result::Failure => failure
+        [result, [*failures, InvalidPropertyTypeException.new(path: field.path, wanted: field.type, raw: failure.input, grievance: failure.error)]]
       in [:error, value]
         [result, [*failures, value]]
       end

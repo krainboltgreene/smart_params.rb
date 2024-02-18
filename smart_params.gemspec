@@ -17,8 +17,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir[File.join("lib", "**", "*"), "LICENSE", "README.md", "Rakefile"]
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "activesupport"
-  spec.add_runtime_dependency "dry-types"
-  spec.add_runtime_dependency "recursive-open-struct"
+  spec.add_runtime_dependency "activesupport", "~> 7.0"
+  spec.add_runtime_dependency "dry-types", "~> 1.7"
   spec.metadata["rubygems_mfa_required"] = "true"
 end

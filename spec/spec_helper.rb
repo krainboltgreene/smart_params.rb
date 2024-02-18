@@ -15,7 +15,7 @@ module AccountSchema
         field attributes, :email, Strict::String
         field attributes, :username, Strict::String.optional
         field attributes, "full-name", Strict::String.optional
-        field(attributes, :password, Strict::String.default { SecureRandom.hex(32) }.optional)
+        field(attributes, :password, Strict::String.optional.default { SecureRandom.hex(32) })
       end
     end
     field create, :meta, Strict::Hash.optional

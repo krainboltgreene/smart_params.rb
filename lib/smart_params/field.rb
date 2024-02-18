@@ -3,6 +3,7 @@
 module SmartParams
   class Field
     attr_reader :path
+    attr_reader :type
 
     def initialize(path:, type:, optional: false, **)
       @path = path
@@ -21,6 +22,8 @@ module SmartParams
       in [:ok, value, type, _]
         type.try(value)
       end
+    rescue Dry::Types::ConstraintError => constraint_error
+      Dry::Types::Result::Failure.new(value, constraint_error)
     end
 
     def update_in(result, value)

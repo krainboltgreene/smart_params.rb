@@ -16,26 +16,75 @@ RSpec.describe SmartParams do
       let(:params) { {} }
 
       it "throws an error with a message detailing the invalid property type and given properties" do
-        expect { subject }.to raise_exception(SmartParams::InvalidPropertyTypeException, "expected /data to be Key/Value Mapping, but is nil")
+        expect { subject }.to raise_exception(SmartParams::InvalidPayloadException, "structure failed to validate: \n\t/data is missing from the structure, last node was {}\n\t/data/type is missing from the structure, last node was {}\n\t/data/attributes is missing from the structure, last node was {}\n\t/data/attributes/email is missing from the structure, last node was {}")
       end
 
       it "throws an error with the missing property and given properties" do
-        expect { subject }.to raise_exception do |exception|
-          expect(exception).to have_attributes(path: [:data], wanted: a_kind_of(String), raw: nil)
+        expect { subject }.to raise_exception(SmartParams::InvalidPayloadException) do |exception|
+          expect(exception).to(have_attributes(failures: an_array_matching([
+                                                                             have_attributes(class: SmartParams::MissingPropertyException, path: [:data], last: {}),
+                                                                             have_attributes(class: SmartParams::MissingPropertyException, path: [:data, :type], last: {}),
+                                                                             have_attributes(class: SmartParams::MissingPropertyException, path: [:data, :attributes], last: {}),
+                                                                             have_attributes(class: SmartParams::MissingPropertyException, path: [:data, :attributes, :email], last: {})
+                                                                           ])))
         end
       end
     end
 
-    context "with a good key but bad type" do
-      let(:params) { { data: "" } }
+    context "with a good root key, intermediary key, and bad type" do
+      let(:params) do
+        {
+          data: {
+            type: "accounts",
+            attributes: {
+              email: "kurtis@example.com",
+              password: 1
+            }
+          },
+          meta: {
+            jsonapi_version: "1.0"
+          },
+          included: [
+            {
+              data: {
+                id: "a",
+                type: "widget",
+                attributes: {
+                  title: "Widget A"
+                }
+              }
+            }
+          ]
+        }
+      end
 
       it "throws an error with a message detailing the invalid property, expected type, given type, and given value" do
-        expect { subject }.to raise_exception(SmartParams::InvalidPropertyTypeException, "expected /data to be Key/Value Mapping, but is String")
+        expect { subject }.to raise_exception(SmartParams::InvalidPayloadException, "structure failed to validate: \n\texpected /data/attributes/password to be NilClass | String, but is 1 and 1 violates constraints (type?(String, 1) failed)")
       end
 
       it "throws an error with the invalid property, expected type, given type, and given value" do
-        expect { subject }.to raise_exception do |exception|
-          expect(exception).to have_attributes(path: [:data], wanted: a_kind_of(Hash), raw: "")
+        expect { subject }.to raise_exception(SmartParams::InvalidPayloadException) do |exception|
+          expect(exception).to(have_attributes(failures: an_array_matching([
+                                                                             have_attributes(class: SmartParams::InvalidPropertyTypeException, path: [:data, :attributes, :password])
+                                                                           ])))
+        end
+      end
+    end
+
+    context "with a good root key but missing intermediary key" do
+      let(:params) { { data: "" } }
+
+      it "throws an error with a message detailing the invalid property, expected type, given type, and given value" do
+        expect { subject }.to raise_exception(SmartParams::InvalidPayloadException, "structure failed to validate: \n\t/data/type is missing from the structure, last node was \"\"\n\t/data/attributes is missing from the structure, last node was \"\"\n\t/data/attributes/email is missing from the structure, last node was \"\"")
+      end
+
+      it "throws an error with the invalid property, expected type, given type, and given value" do
+        expect { subject }.to raise_exception(SmartParams::InvalidPayloadException) do |exception|
+          expect(exception).to(have_attributes(failures: an_array_matching([
+                                                                             have_attributes(class: SmartParams::MissingPropertyException, path: [:data, :type], last: ""),
+                                                                             have_attributes(class: SmartParams::MissingPropertyException, path: [:data, :attributes], last: ""),
+                                                                             have_attributes(class: SmartParams::MissingPropertyException, path: [:data, :attributes, :email], last: "")
+                                                                           ])))
         end
       end
     end
@@ -208,9 +257,7 @@ RSpec.describe SmartParams do
       end
 
       it "checks subfields" do
-        expect do
-          subject
-        end.to raise_exception(SmartParams::InvalidPropertyTypeException)
+        expect(subject).to(an_array_matching([have_attributes(class: SmartParams::MissingPropertyException, path: [:data, :id], last: { is: "garbage" })]))
       end
     end
 
