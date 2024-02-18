@@ -136,7 +136,7 @@ Or install it yourself with:
 
 ## Contributing
 
-  1. Read the [Code of Conduct](/CONDUCT)
+  1. Read the [Code of Conduct](/CONDUCT.md)
   2. Fork it
   3. Create your feature branch (`git checkout -b my-new-feature`)
   4. Test your code: `rake spec`

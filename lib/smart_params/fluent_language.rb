@@ -24,13 +24,13 @@ module SmartParams
       end
 
       private def field(prefix, name, type = nil, **)
-        raise MissingTypeException if type.nil? && !block_given?
-
         root, *remaining = Kernel.Array(prefix)
 
         path = [root, *remaining, name]
 
-        raise KeyAlreadyDefinedException.new(path:) if self.namespaces[root].any? { |field| field.path == path }
+        raise SmartParams::MissingTypeAnnotationException.new(path:) if type.nil? && !block_given?
+
+        raise SmartParams::PathAlreadyDefinedException.new(path:) if self.namespaces[root].any? { |field| field.path == path }
 
         self.namespaces[root] = [
           *self.namespaces[root],
