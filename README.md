@@ -8,22 +8,22 @@ Work smart, not strong. This gem gives developers an easy to understand and easy
 So lets say you have a complex set of incoming data, say a JSON:API-specification compliant payload that contains the data to create an account on your server. Of course, your e-commerce platform is pretty flexible; You don't stop users from creating an account just because they don't have an email or password. So let's see how this would play out:
 
 ``` ruby
-class CreateAccountSchema
-  include SmartParams
+module AccountSchema
+  include SmartParams::FluentLanguage
 
-  schema do
-    field :data, subschema: true do
-      field :id, type: Coercible::String, nullable: true
-      field :type, type: Strict::String
-      field :attributes, subschema: true, nullable: true do
-        field :email, type: Strict::String, nullable: true
-        field :username, type: Strict::String, nullable: true
-        field :name, type: Strict::String, nullable: true
-        field :password, type: Strict::String.default { SecureRandom.hex(32) }, nullable: true
+  schema do |root|
+    field root, :data, subschema: true do |data|
+      field data, :id, type: Coercible::String.optional
+      field data, :type, type: Strict::String
+      field data, :attributes do |attributes|
+        field attributes, :email, type: Strict::String
+        field attributes, :username, type: Strict::String.optional
+        field attributes, :name, type: Strict::String.optional
+        field attributes, :password, type: Strict::String.default { SecureRandom.hex(32) }.optional
       end
     end
-    field :meta, Strict::Hash, nullable: true
-    field :included, type: Strict::Array, nullable: true
+    field :meta, Strict::Hash.optional
+    field :included, type: Strict::Array.optional
   end
 end
 ```
@@ -33,11 +33,11 @@ And now using that schema in the controller:
 ``` ruby
 class AccountsController < ApplicationController
   def create
-    schema = CreateAccountSchema.new(params)
+    payload = SmartParams.from(AccountSchema, params)
     # parameters will be a SmartParams::Dataset, which will respond to the various fields you defined
 
     # Here we're pulling out the id and data properties defined above
-    record = Account.create({id: schema.data.id, **schema.data.attributes})
+    record = Account.create({id: payload[:data][:id], **payload[:data][:attributes]})
 
     redirect_to account_url(record)
   end
@@ -49,43 +49,43 @@ Okay, so lets look at some scenarios.
 First, lets try an empty payload:
 
 ``` ruby
-CreateAccountSchema.new({})
-# raises SmartParams::Error::InvalidPropertyType, keychain: [:data], wanted: Hash, raw: nil
 
-# You can return the exception directly by providing :safe => false
+SmartParams.from(AccountSchema, {}).payload
+# returns [InvalidPropertyTypeException | MissingPropertyException]
 
-CreateAccountSchema.new({}, safe: false).payload
-# return #<SmartParams::Error::InvalidPropertyType... keychain: [:data], wanted: Hash, raw: nil>
+SmartParams.validate!(AccountSchema, {})
+# raises SmartParams::InvalidPayloadException(failures: [InvalidPropertyTypeException | MissingPropertyException])
 ```
 
 Great, we've told SmartParams we need `data` and it enforced this! The exception class knows the "key chain" path to the property that was missing and the value that was given. Lets experiment with that:
 
 ``` ruby
-CreateAccountSchema.new({data: ""})
-# raise SmartParams::Error::InvalidPropertyType, keychain: [:data], wanted: Hash, raw: ""
+SmartParams.from(AccountSchema, {data: ""})
+# returns [MissingPropertyException(path: [:data], last: {data: ""})]
 ```
 
 Sweet, we can definitely catch this and give the client a meaningful error! Okay, so to show off a good payload I'm going to do two things: Examine the properties and turn it to a JSON compatible structure. Lets see a minimum viable account according to our schema:
 
 
 ``` ruby
-schema = CreateAccountSchema.new({
+payload = SmartParams.from(AccountSchema, {
   data: {
-    type: "accounts"
+    type: "accounts",
+    attributes: {
+      email: "kurtis@example.com"
+    }
   }
 })
 
-schema.payload.data.type
+payload[:data][:type]
 # "accounts"
 
-schema.data.type
-# "accounts"
-
-schema.as_json
+payload.as_json
 # {
 #   "data" => {
 #     "type" => "accounts",
 #     "attributes" => {
+#       "email" => "kurtis@example.com",
 #       "password" => "1a6c3ffa4e96ad1660cb819f52a3393d924ac20073e84a9a6943a721d49bab38"
 #     }
 #   }

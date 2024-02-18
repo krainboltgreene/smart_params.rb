@@ -4,43 +4,48 @@ require "pry"
 require "smart_params"
 require "securerandom"
 
-class CreateAccountSchema
-  include SmartParams
+module AccountSchema
+  include SmartParams::FluentLanguage
 
-  schema do
-    field :data, subschema: true do
-      field :id, type: Coercible::String, nullable: true
-      field :type, type: Strict::String
-      subschema :attributes, nullable: true do
-        field :email, type: Strict::String, nullable: true
-        field :username, type: Strict::String, nullable: true
-        field "full-name", type: Strict::String, nullable: true
-        field :password, type: Strict::String.default { SecureRandom.hex(32) }, nullable: true
+  schema(:create) do |create|
+    field create, :data do |data|
+      field data, :id, Coercible::String.optional
+      field data, :type, Strict::String
+      field data, :attributes do |attributes|
+        field attributes, :email, Strict::String
+        field attributes, :username, Strict::String.optional
+        field attributes, "full-name", Strict::String.optional
+        field(attributes, :password, Strict::String.default { SecureRandom.hex(32) }.optional)
       end
     end
-    field :meta, type: Strict::Hash, nullable: true
-    field :included, type: Strict::Array, nullable: true
+    field create, :meta, Strict::Hash.optional
+    field create, :included, Strict::Array.optional
+  end
+
+  schema(:index) do |index|
+    field index, :meta, Strict::Hash.optional
+    field index, :included, Strict::Array.optional
   end
 end
 
-class NullableSchema
-  include SmartParams
+module NullableSchema
+  include SmartParams::FluentLanguage
 
-  schema do
-    field :data, subschema: true, nullable: true do
-      field :id, type: Coercible::String, nullable: true
-      field :type, type: Strict::String, nullable: true
+  schema do |root|
+    field root, :data, optional: true do |data|
+      field data, :id, Coercible::String.optional
+      field data, :type, Strict::String.optional
     end
   end
 end
 
-class NullableRequiredSubfieldSchema
-  include SmartParams
+module NullableRequiredSubfieldSchema
+  include SmartParams::FluentLanguage
 
-  schema do
-    field :data, subschema: true, nullable: true do
-      field :id, type: Coercible::String
-      field :type, type: Strict::String, nullable: true
+  schema do |root|
+    field root, :data, optional: true do |data|
+      field data, :id, Coercible::String
+      field data, :type, Strict::String.optional
     end
   end
 end

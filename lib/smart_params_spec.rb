@@ -3,21 +3,25 @@
 require "spec_helper"
 
 RSpec.describe SmartParams do
-  let(:schema) { CreateAccountSchema.new(params) }
-  let(:nullable_schema) { NullableSchema.new(params) }
-  let(:nullable_required_subfield_schema) { NullableRequiredSubfieldSchema.new(params) }
+  let(:account_payload) { described_class.from(AccountSchema, params, :create) }
+  let(:nullable_payload) { described_class.from(NullableSchema, params) }
+  let(:nullable_required_subfield_payload) { described_class.from(NullableRequiredSubfieldSchema, params) }
 
-  describe ".new" do
+  describe ".validate!(account_payload)" do
+    subject { account_payload }
+
+    let(:account_payload) { described_class.validate!(AccountSchema, params, :create) }
+
     context "with an empty params" do
       let(:params) { {} }
 
       it "throws an error with a message detailing the invalid property type and given properties" do
-        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but is nil")
+        expect { subject }.to raise_exception(SmartParams::InvalidPropertyTypeException, "expected /data to be Key/Value Mapping, but is nil")
       end
 
       it "throws an error with the missing property and given properties" do
-        expect { schema }.to raise_exception do |exception|
-          expect(exception).to have_attributes(keychain: [:data], wanted: a_kind_of(Dry::Types::Constrained), raw: nil)
+        expect { subject }.to raise_exception do |exception|
+          expect(exception).to have_attributes(path: [:data], wanted: a_kind_of(String), raw: nil)
         end
       end
     end
@@ -26,19 +30,19 @@ RSpec.describe SmartParams do
       let(:params) { { data: "" } }
 
       it "throws an error with a message detailing the invalid property, expected type, given type, and given value" do
-        expect { schema }.to raise_exception(SmartParams::Error::InvalidPropertyType, "expected [:data] to be Hash, but is \"\"")
+        expect { subject }.to raise_exception(SmartParams::InvalidPropertyTypeException, "expected /data to be Key/Value Mapping, but is String")
       end
 
       it "throws an error with the invalid property, expected type, given type, and given value" do
-        expect { schema }.to raise_exception do |exception|
-          expect(exception).to have_attributes(keychain: [:data], wanted: a_kind_of(Dry::Types::Constrained), raw: "")
+        expect { subject }.to raise_exception do |exception|
+          expect(exception).to have_attributes(path: [:data], wanted: a_kind_of(Hash), raw: "")
         end
       end
     end
   end
 
-  describe "#payload" do
-    subject { schema.payload }
+  describe ".from(account_payload)" do
+    subject { account_payload }
 
     context "with a reasonably good params" do
       let(:params) do
@@ -67,25 +71,59 @@ RSpec.describe SmartParams do
         }
       end
 
+      it "returns as native data types" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              data: hash_including(
+                {
+                  type: "accounts",
+                  attributes: hash_including(
+                    {
+                      email: "kurtis@example.com",
+                      password: an_instance_of(String)
+                    }
+                  )
+                }
+              ),
+              meta: {
+                jsonapi_version: "1.0"
+              },
+              included: [
+                {
+                  data: {
+                    id: "a",
+                    type: "widget",
+                    attributes: {
+                      title: "Widget A"
+                    }
+                  }
+                }
+              ]
+            }
+          )
+        )
+      end
+
       it "has a chain path data.type" do
-        expect(subject.data.type).to eq("accounts")
+        expect(subject[:data][:type]).to eq("accounts")
       end
 
       it "has a chain path data.attributes.email" do
-        expect(subject.data.attributes.email).to eq("kurtis@example.com")
+        expect(subject[:data][:attributes][:email]).to eq("kurtis@example.com")
       end
 
       it "has a chain path data.attributes.password" do
-        expect(subject.data.attributes.password).to be_a(String)
+        expect(subject[:data][:attributes][:password]).to be_a(String)
       end
 
       it "has a chain path meta.jsonapi_version" do
-        expect(subject.meta.jsonapi_version).to eq("1.0")
+        expect(subject[:meta][:jsonapi_version]).to eq("1.0")
       end
     end
-  end
 
-  shared_examples "native types" do
     context "with extra params" do
       let(:params) do
         {
@@ -105,12 +143,12 @@ RSpec.describe SmartParams do
           subject
         ).to match(
           {
-            "data" => hash_including(
+            data: hash_including(
               {
-                "type" => "accounts",
-                "attributes" => hash_including(
+                type: "accounts",
+                attributes: hash_including(
                   {
-                    "email" => "kurtis@example.com"
+                    email: "kurtis@example.com"
                   }
                 )
               }
@@ -138,12 +176,12 @@ RSpec.describe SmartParams do
           subject
         ).to match(
           {
-            "data" => hash_including(
+            data: hash_including(
               {
-                "type" => "accounts",
-                "attributes" => hash_including(
+                type: "accounts",
+                attributes: hash_including(
                   {
-                    "email" => "kurtis@example.com",
+                    email: "kurtis@example.com",
                     "full-name" => "Kurtis Rainbolt-Greene"
                   }
                 )
@@ -153,332 +191,12 @@ RSpec.describe SmartParams do
         )
       end
     end
-
-    context "with a reasonably good params" do
-      let(:params) do
-        {
-          data: {
-            type: "accounts",
-            attributes: {
-              email: "kurtis@example.com",
-              password: "secret"
-            }
-          },
-          meta: {
-            jsonapi_version: "1.0"
-          },
-          included: [
-            {
-              data: {
-                id: "a",
-                type: "widget",
-                attributes: {
-                  title: "Widget A"
-                }
-              }
-            }
-          ]
-        }
-      end
-
-      it "returns as native data types" do
-        expect(
-          subject
-        ).to match(
-          hash_including(
-            {
-              "data" => hash_including(
-                {
-                  "type" => "accounts",
-                  "attributes" => hash_including(
-                    {
-                      "email" => "kurtis@example.com",
-                      "password" => an_instance_of(String)
-                    }
-                  )
-                }
-              ),
-              "meta" => {
-                "jsonapi_version" => "1.0"
-              },
-              "included" => [
-                {
-                  "data" => {
-                    "id" => "a",
-                    "type" => "widget",
-                    "attributes" => {
-                      "title" => "Widget A"
-                    }
-                  }
-                }
-              ]
-            }
-          )
-        )
-      end
-    end
   end
 
-  describe "#to_hash" do
-    subject { schema.to_hash }
-
-    include_examples "native types"
-  end
-
-  describe "#as_json" do
-    subject { schema.as_json }
-
-    include_examples "native types"
-  end
-
-  describe "#fetch" do
-    subject { schema.fetch("data") }
-
-    context "with a reasonably good params" do
-      let(:params) do
-        {
-          data: {
-            type: "accounts",
-            attributes: {
-              email: "kurtis@example.com",
-              password: "secret"
-            }
-          },
-          meta: {
-            jsonapi_version: "1.0"
-          },
-          included: [
-            {
-              data: {
-                id: "a",
-                type: "widget",
-                attributes: {
-                  title: "Widget A"
-                }
-              }
-            }
-          ]
-        }
-      end
-
-      it "returns the native type" do
-        expect(
-          subject
-        ).to match(
-          hash_including(
-            {
-              "type" => "accounts",
-              "attributes" => hash_including(
-                {
-                  "email" => "kurtis@example.com",
-                  "password" => an_instance_of(String)
-                }
-              )
-            }
-          )
-        )
-      end
-    end
-  end
-
-  describe "#dig" do
-    subject { schema.dig("data", "attributes", "email") }
-
-    context "with a reasonably good params" do
-      let(:params) do
-        {
-          data: {
-            type: "accounts",
-            attributes: {
-              email: "kurtis@example.com"
-            }
-          },
-          meta: {
-            jsonapi_version: "1.0"
-          },
-          included: [
-            {
-              data: {
-                id: "a",
-                type: "widget",
-                attributes: {
-                  title: "Widget A"
-                }
-              }
-            }
-          ]
-        }
-      end
-
-      it "returns the native type" do
-        expect(
-          subject
-        ).to eq(
-          "kurtis@example.com"
-        )
-      end
-    end
-  end
-
-  describe "#fetch_values" do
-    subject { schema.fetch_values("data", "meta") }
-
-    context "with a reasonably good params" do
-      let(:params) do
-        {
-          data: {
-            type: "accounts",
-            attributes: {
-              email: "kurtis@example.com",
-              password: "secret"
-            }
-          },
-          meta: {
-            jsonapi_version: "1.0"
-          },
-          included: [
-            {
-              data: {
-                id: "a",
-                type: "widget",
-                attributes: {
-                  title: "Widget A"
-                }
-              }
-            }
-          ]
-        }
-      end
-
-      it "returns the native type" do
-        expect(
-          subject
-        ).to match(
-          [
-            hash_including(
-              {
-                "type" => "accounts",
-                "attributes" => hash_including(
-                  {
-                    "email" => "kurtis@example.com",
-                    "password" => an_instance_of(String)
-                  }
-                )
-              }
-            ),
-            hash_including(
-              {
-                "jsonapi_version" => "1.0"
-              }
-            )
-          ]
-        )
-      end
-    end
-  end
-
-  describe "nullable values" do
-    context "when set to nil" do
-      subject { nullable_schema.to_hash }
-
-      let(:params) do
-        {
-          data: nil
-        }
-      end
-
-      it "returns explicit nil" do
-        expect(
-          subject
-        ).to match(
-          hash_including(
-            {
-              "data" => nil
-            }
-          )
-        )
-      end
-    end
-
-    context "when provided matching data" do
-      subject { nullable_schema.to_hash }
-
-      let(:params) do
-        {
-          data: {
-            id: "1",
-            type: "people"
-          }
-        }
-      end
-
-      it "returns matching data" do
-        expect(
-          subject
-        ).to match(
-          hash_including(
-            {
-              "data" => hash_including(
-                {
-                  "id" => "1",
-                  "type" => "people"
-                }
-              )
-            }
-          )
-        )
-      end
-    end
-
-    context "when not provided" do
-      subject { nullable_schema.to_hash }
-
-      let(:params) do
-        {}
-      end
-
-      it "does not set nil relationship" do
-        expect(
-          subject
-        ).to match(
-          hash_excluding(
-            {
-              "data" => nil
-            }
-          )
-        )
-      end
-    end
-
-    context "with non matching subfield data" do
-      subject { nullable_schema.to_hash }
-
-      let(:params) do
-        {
-          data: {
-            id: "x",
-            type: "y",
-            is: "garbage"
-          }
-        }
-      end
-
-      it "does not return key that isn't specified" do
-        expect(
-          subject
-        ).to match(
-          hash_excluding(
-            {
-              "is" => "garbage"
-            }
-          )
-        )
-      end
-    end
+  describe ".from(nullable_required_subfield_payload)" do
+    subject { nullable_required_subfield_payload }
 
     context "when specified with unclean data" do
-      subject { nullable_required_subfield_schema.to_hash }
-
       let(:params) do
         {
           # This will raise an exception becase the data hash is specified
@@ -492,13 +210,11 @@ RSpec.describe SmartParams do
       it "checks subfields" do
         expect do
           subject
-        end.to raise_exception(SmartParams::Error::InvalidPropertyType)
+        end.to raise_exception(SmartParams::InvalidPropertyTypeException)
       end
     end
 
     context "when specified as null" do
-      subject { nullable_required_subfield_schema.to_hash }
-
       let(:params) do
         {
           # This will not raise an error, since data is allowed to be null.
@@ -515,8 +231,6 @@ RSpec.describe SmartParams do
     end
 
     context "when unspecified with required subfield" do
-      subject { nullable_required_subfield_schema.to_hash }
-
       let(:params) do
         {
           # In this case, the nullable data hash is not specified so we
@@ -528,6 +242,100 @@ RSpec.describe SmartParams do
         expect do
           subject
         end.not_to raise_exception
+      end
+    end
+  end
+
+  describe ".from(nullable_payload)" do
+    subject { nullable_payload }
+
+    context "when set to nil" do
+      let(:params) do
+        {
+          data: nil
+        }
+      end
+
+      it "returns explicit nil" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              data: nil
+            }
+          )
+        )
+      end
+    end
+
+    context "when provided matching data" do
+      let(:params) do
+        {
+          data: {
+            id: "1",
+            type: "people"
+          }
+        }
+      end
+
+      it "returns matching data" do
+        expect(
+          subject
+        ).to match(
+          hash_including(
+            {
+              data: hash_including(
+                {
+                  id: "1",
+                  type: "people"
+                }
+              )
+            }
+          )
+        )
+      end
+    end
+
+    context "when not provided" do
+      let(:params) do
+        {}
+      end
+
+      it "does not set nil relationship" do
+        expect(
+          subject
+        ).to match(
+          hash_excluding(
+            {
+              data: nil
+            }
+          )
+        )
+      end
+    end
+
+    context "with non matching subfield data" do
+      let(:params) do
+        {
+          data: {
+            id: "x",
+            type: "y",
+            is: "garbage"
+          }
+        }
+      end
+
+      it "does not return key that isn't specified" do
+        expect(
+          subject
+        ).to match(
+          hash_excluding(
+            {
+              is: "garbage"
+            }
+          )
+        )
       end
     end
   end
