@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SmartParams
   class InvalidPayloadException < StandardError
     attr_reader :failures

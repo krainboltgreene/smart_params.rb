@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SmartParams
   class NoMatchingNamespaceException < StandardError
     def initialize(namespace:, available:)
