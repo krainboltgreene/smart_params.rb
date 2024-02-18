@@ -6,6 +6,8 @@ require "active_support/core_ext/object"
 require "active_support/core_ext/module"
 
 module SmartParams
+  require_relative "smart_params/missing_type_annotation_exception"
+  require_relative "smart_params/path_already_defined_exception"
   require_relative "smart_params/invalid_payload_exception"
   require_relative "smart_params/invalid_property_type_exception"
   require_relative "smart_params/missing_property_exception"
